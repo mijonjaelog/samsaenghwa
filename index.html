@@ -14,7 +14,8 @@ body{overflow:hidden}
 <div id="loading">삼생화 상세페이지를 불러오는 중...</div>
 <iframe id="page" title="삼생화 상세 소개"></iframe>
 <script>
-const files=Array.from({length:28},(_,i)=>"parts/part-"+String(i+1).padStart(2,"0")+".htmlpart");
+const DETAIL_VERSION="v5.1-20261006-1351";
+const files=Array.from({length:28},(_,i)=>"parts/part-"+String(i+1).padStart(2,"0")+".htmlpart?v="+DETAIL_VERSION);
 
 function patchDetailPage(html){
   const extraCss = `
