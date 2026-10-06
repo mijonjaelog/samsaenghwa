@@ -63,6 +63,19 @@ h2::after{content:"";display:block;width:46px;height:2px;background:var(--rose2)
 blockquote{margin:15px 0 0;padding:11px 13px;background:#faf1f2;border-left:2px solid var(--rose2);color:#68464f;font-size:14px}
 .tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:14px}
 .tag{font-size:10px;border:1px solid #e7d2d7;border-radius:99px;padding:4px 8px;background:#fffafa;color:#73505a}
+.dialogue-examples{margin-top:16px;padding-top:14px;border-top:1px solid var(--line)}
+.dialogue-examples-title{display:flex;align-items:center;gap:8px;margin-bottom:8px;font-size:10px;font-weight:700;letter-spacing:.16em;color:var(--rose)}
+.dialogue-examples-title::after{content:"";height:1px;flex:1;background:#eedfe1}
+.dialogue-line{margin-top:7px;padding:9px 11px;border:1px solid #efe0dd;background:#fffaf8;color:#604751;font-size:13px;line-height:1.65}
+.unsafe-samples{margin-top:12px;border:1px solid #e6c9cf;background:#fff6f7}
+.unsafe-samples summary{cursor:pointer;list-style:none;padding:10px 12px;color:#944d5c;font-size:11px;font-weight:700;letter-spacing:.11em}
+.unsafe-samples summary::-webkit-details-marker{display:none}
+.unsafe-samples summary::after{content:"＋";float:right}
+.unsafe-samples[open] summary::after{content:"－"}
+.unsafe-inner{padding:0 11px 11px}
+.unsafe-note{margin:0 0 7px;color:#9a737c;font-size:10px;line-height:1.55}
+.unsafe-line{margin-top:7px;padding:9px 11px;border-left:2px solid #b45d70;background:#fff;color:#5b4049;font-size:13px;line-height:1.65}
+
 .play-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
 .play-card{padding:20px;background:var(--paper2);border-top:2px solid var(--rose2)}
 .play-card h3{font-size:17px;margin:0 0 6px}
