@@ -167,6 +167,41 @@ function patchDetailPage(html){
   html = html.replace("const sectionIds = ['intro','fragment','world','case','cast','persona','commands','play'];",
                       "const sectionIds = ['intro','fragment','world','offices','case','cast','persona','commands','play'];");
 
+
+  // v5.1: 캐릭터 대사 블록 6인 통일
+  {
+    const doc = new DOMParser().parseFromString(html,'text/html');
+    const quoteByName = {
+      '류서겸':'“말하지 않아도 되는 일이라면 묻지 않겠습니다. 다만 사라지지는 마십시오.”',
+      '위무진':'“돌려 말하지 마십시오. 그래서 뭘 원하는 겁니까.”',
+      '문지후':'“그럴 줄 알았습니다. 그래서 밥은 드셨습니까?”',
+      '서문령':'“이상하군요. 방금 말씀과 기록 중 하나는 틀렸다는 뜻인데.”',
+      '한소담':'“괜찮기는요. 얼굴이 그 모양인데. 일단 앉아요.”',
+      '신윤서':'“믿고 있습니다. 그러나 그 문서를 보여드릴 권한은 없습니다.”'
+    };
+    doc.querySelectorAll('article.character-card').forEach(card=>{
+      const copy = card.querySelector('.character-copy');
+      const h3 = copy && copy.querySelector('h3');
+      if(!copy || !h3) return;
+      let name = '';
+      for(const node of h3.childNodes){
+        if(node.nodeType===Node.TEXT_NODE && node.textContent.trim()){
+          name = node.textContent.trim();
+          break;
+        }
+      }
+      const quote = quoteByName[name];
+      if(!quote) return;
+      copy.querySelectorAll('.sample-dialogue, blockquote').forEach(el=>el.remove());
+      const box = doc.createElement('div');
+      box.className = 'sample-dialogue';
+      box.innerHTML = '<div class="dialogue-head"><span class="dialogue-kicker">DIALOGUE</span></div><p class="dialogue-quote">'+quote+'</p>';
+      const tags = copy.querySelector('.tags');
+      if(tags) tags.before(box); else copy.appendChild(box);
+    });
+    html = '<!doctype html>\n' + doc.documentElement.outerHTML;
+  }
+
   return html;
 }
 
