@@ -14,7 +14,7 @@ body{overflow:hidden}
 <div id="loading">삼생화 상세페이지를 불러오는 중...</div>
 <iframe id="page" title="삼생화 상세 소개"></iframe>
 <script>
-const DETAIL_VERSION="v5.3-20261006-1400";
+const DETAIL_VERSION="v5.4-20261006-1410";
 const files=Array.from({length:28},(_,i)=>"parts/part-"+String(i+1).padStart(2,"0")+".htmlpart?v="+DETAIL_VERSION);
 
 function patchDetailPage(html){
@@ -193,7 +193,7 @@ function patchDetailPage(html){
       }
       const quote = quoteByName[name];
       if(!quote) return;
-      copy.querySelectorAll('.sample-dialogue, blockquote').forEach(el=>el.remove());
+      copy.querySelectorAll('.sample-dialogue, .dialogue-examples, blockquote').forEach(el=>el.remove());
       const box = doc.createElement('div');
       box.className = 'sample-dialogue';
       box.innerHTML = '<div class="dialogue-head"><span class="dialogue-kicker">DIALOGUE</span></div><p class="dialogue-quote">'+quote+'</p>';
