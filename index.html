@@ -203,6 +203,95 @@ function patchDetailPage(html){
     html = '<!doctype html>\n' + doc.documentElement.outerHTML;
   }
 
+
+  // v5.2: 6인 대사 구성 통일 — DIALOGUE 1 + EXAMPLES 2
+  {
+    const doc = new DOMParser().parseFromString(html,'text/html');
+    const dialogueMap = {
+      '류서겸':{
+        main:'“말하지 않아도 되는 일이라면 묻지 않겠습니다. 다만 사라지지는 마십시오.”',
+        examples:[
+          '“가능성은 있습니다. 다만 지금 단정하진 않겠습니다. 원하시면 함께 다시 보시겠습니까?”',
+          '“먼저 들은 뒤 판단하겠습니다. 그 전까지는 어느 쪽도 단정하지 않겠습니다.”'
+        ]
+      },
+      '위무진':{
+        main:'“돌려 말하지 마십시오. 그래서 뭘 원하는 겁니까.”',
+        examples:[
+          '“믿으라고 한 적 없습니다. 제가 하는 걸 보십시오. 그다음 판단하면 됩니다.”',
+          '“됐습니다. 손부터 보여주십시오. 별거 아닌지는 보고 판단하겠습니다.”'
+        ]
+      },
+      '문지후':{
+        main:'“그럴 줄 알았습니다. 그래서 밥은 드셨습니까?”',
+        examples:[
+          '“사건은 사건이고 끼니는 끼니죠. 굶는다고 진실이 빨리 나오진 않습니다.”',
+          '“저 표정이면 뭔가 숨기는 겁니다. 뭐, 저도 하나쯤은 숨기고 있고요.”'
+        ]
+      },
+      '서문령':{
+        main:'“이상하군요. 방금 말씀과 기록 중 하나는 틀렸다는 뜻인데.”',
+        examples:[
+          '“기록도 안 믿습니다. 사람만 특별히 의심하는 건 아닙니다. 공평하죠.”',
+          '“평소라면 그렇다고 답했겠죠. 지금은 먼저 들을 생각입니다. 말씀해보십시오.”'
+        ]
+      },
+      '한소담':{
+        main:'“괜찮기는요. 얼굴이 그 모양인데. 일단 앉아요.”',
+        examples:[
+          '“그럼 안 물어요. 대신 아픈 데까지 숨기지는 마요.”',
+          '“미안하면 나중에 갚아요. 지금 돈 아낀다고 더 앓으면 그게 더 손해예요.”'
+        ]
+      },
+      '신윤서':{
+        main:'“믿고 있습니다. 그러나 그 문서를 보여드릴 권한은 없습니다.”',
+        examples:[
+          '“있습니다. 그래서 더 조심합니다. 없었다고 말하는 편이 오히려 무책임하겠지요.”',
+          '“원칙을 버리는 대신, 허용되는 방법을 끝까지 찾겠습니다.”'
+        ]
+      }
+    };
+
+    doc.querySelectorAll('article.character-card').forEach(card=>{
+      const copy = card.querySelector('.character-copy');
+      const h3 = copy && copy.querySelector('h3');
+      if(!copy || !h3) return;
+      let name='';
+      for(const node of h3.childNodes){
+        if(node.nodeType===Node.TEXT_NODE && node.textContent.trim()){
+          name=node.textContent.trim();
+          break;
+        }
+      }
+      const d=dialogueMap[name];
+      if(!d) return;
+
+      copy.querySelectorAll('.sample-dialogue,.dialogue-examples,blockquote').forEach(el=>el.remove());
+      const tags=copy.querySelector('.tags');
+      if(!tags) return;
+
+      const main=document.createElement('div');
+      main.className='sample-dialogue';
+      main.innerHTML='<div class="dialogue-head"><span class="dialogue-kicker">DIALOGUE</span></div><p class="dialogue-quote">'+d.main+'</p>';
+      tags.before(main);
+
+      const ex=document.createElement('div');
+      ex.className='dialogue-examples';
+      ex.innerHTML='<div class="dialogue-head"><span class="dialogue-kicker">DIALOGUE EXAMPLES</span></div>'+
+        d.examples.map(q=>'<p class="dialogue-quote">'+q+'</p>').join('');
+      tags.after(ex);
+    });
+
+    if(!doc.getElementById('dialogue-v52-style')){
+      const st=doc.createElement('style');
+      st.id='dialogue-v52-style';
+      st.textContent='.dialogue-examples{margin-top:16px;padding-top:14px;border-top:1px solid var(--line)}.dialogue-examples .dialogue-head{margin-bottom:9px}';
+      doc.head.appendChild(st);
+    }
+
+    html='<!doctype html>\n'+doc.documentElement.outerHTML;
+  }
+
   return html;
 }
 
