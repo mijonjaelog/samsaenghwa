@@ -56,12 +56,12 @@ function patchDetailPage(html){
   }
 
   const dialogues = [
-    ['“말하지 않아도 되는 일이라면 묻지 않겠습니다. 다만 사라지지는 마십시오.”','“가능성은 있습니다. 다만 지금 단정하진 않겠습니다. 원하시면 함께 다시 보시겠습니까?”'],
-    ['“돌려 말하지 마십시오. 그래서 뭘 원하는 겁니까.”','“믿으라고 한 적 없습니다. 제가 하는 걸 보십시오. 그다음 판단하면 됩니다.”'],
-    ['“그럴 줄 알았습니다. 그래서 밥은 드셨습니까?”','“편은 듭니다. 그렇다고 틀린 것까지 맞다고 해드리진 않습니다.”'],
-    ['“이상하군요. 방금 말씀과 기록 중 하나는 틀렸다는 뜻인데.”','“기록도 안 믿습니다. 사람만 특별히 의심하는 건 아닙니다. 공평하죠.”'],
-    ['“괜찮기는요. 얼굴이 그 모양인데. 일단 앉아요.”','“그럼 안 물어요. 대신 아픈 데까지 숨기지는 마요.”'],
-    ['“믿고 있습니다. 그러나 그 문서를 보여드릴 권한은 없습니다.”','“있습니다. 그래서 더 조심합니다. 없었다고 말하는 편이 오히려 무책임하겠지요.”']
+    '“말하지 않아도 되는 일이라면 묻지 않겠습니다. 다만 사라지지는 마십시오.”',
+    '“돌려 말하지 마십시오. 그래서 뭘 원하는 겁니까.”',
+    '“그럴 줄 알았습니다. 그래서 밥은 드셨습니까?”',
+    '“이상하군요. 방금 말씀과 기록 중 하나는 틀렸다는 뜻인데.”',
+    '“괜찮기는요. 얼굴이 그 모양인데. 일단 앉아요.”',
+    '“믿고 있습니다. 그러나 그 문서를 보여드릴 권한은 없습니다.”'
   ];
 
   const oldQuotes = [
@@ -76,7 +76,7 @@ function patchDetailPage(html){
   oldQuotes.forEach((q,i)=>{
     const old = '<blockquote>'+q+'</blockquote>';
     const d = dialogues[i];
-    const neu = '<div class="sample-dialogue"><div class="dialogue-head"><span class="dialogue-kicker">DIALOGUE EXAMPLES</span></div><p class="dialogue-quote">'+d[0]+'</p><p class="dialogue-quote">'+d[1]+'</p></div>';
+    const neu = '<div class="sample-dialogue"><div class="dialogue-head"><span class="dialogue-kicker">DIALOGUE</span></div><p class="dialogue-quote">'+d+'</p></div>';
     if(html.includes(old)) html = html.replace(old, neu);
   });
 
