@@ -48,7 +48,15 @@ function patchDetailPage(html){
 .command-note b{color:#553841}
 .command-head{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
 .command-usage{font-size:9px;line-height:1.4;letter-spacing:.03em;color:#aa8d95}
-@media(max-width:680px){.command-grid{grid-template-columns:1fr}.persona-card{padding:18px 17px 16px}}
+
+.office-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:20px}
+.office-card{position:relative;padding:18px 19px;border:1px solid var(--line);background:linear-gradient(145deg,#fff,#fcf7f5)}
+.office-card::before{content:"";position:absolute;left:0;top:0;bottom:0;width:2px;background:var(--rose2)}
+.office-card strong{display:flex;align-items:baseline;gap:8px;font-size:16px;color:#523740}
+.office-card strong em{font-style:normal;font-family:Georgia,"Times New Roman",serif;font-size:11px;color:#b17a87;letter-spacing:.08em}
+.office-card p{margin:9px 0 0;font-size:12.5px;line-height:1.7;color:#705861}
+.office-card small{display:block;margin-top:8px;font-size:10px;color:#a1848c}
+@media(max-width:680px){.command-grid{grid-template-columns:1fr}.persona-card{padding:18px 17px 16px}.office-grid{grid-template-columns:1fr}}
 </style>`;
 
   if(!html.includes('id="samsaenghwa-v3-patch"')){
@@ -129,6 +137,35 @@ function patchDetailPage(html){
                       '<button class="nav-btn" data-target="fragment">파편</button>\n  <button class="nav-btn" data-target="commands">명령어</button>');
   html = html.replace("const sectionIds = ['intro','fragment','world','case','cast','persona','play'];",
                       "const sectionIds = ['intro','fragment','world','case','cast','persona','commands','play'];");
+
+  // v5: 조선계 관제로 통일
+  html = html.replaceAll('도찰원 감찰어사','사헌부 지평');
+  html = html.replaceAll('감찰어사','사헌부 지평');
+  html = html.replaceAll('도찰원','사헌부');
+
+  const officesSection = `
+<section class="section" id="offices">
+  <div class="kicker">CENTRAL OFFICES</div>
+  <h2>경화의 주요 관청</h2>
+  <p style="max-width:780px;margin-top:-7px;margin-bottom:22px;color:#705861;font-size:14px">연국의 중앙 관청은 실제 조선 관제를 바탕으로 재구성했다. 이름은 낯설어도, 역할만 알면 인물들의 움직임이 훨씬 쉽게 보인다.</p>
+  <div class="office-grid">
+    <article class="office-card reveal"><strong>사헌부 <em>司憲府</em></strong><p>관리의 비리와 기강을 살피고 감찰·탄핵을 맡는 관청.</p><small>류서겸 · 지평</small></article>
+    <article class="office-card reveal"><strong>승정원 <em>承政院</em></strong><p>왕명을 출납하고 국왕과 각 관청 사이의 보고·문서를 잇는 왕의 비서기관.</p><small>신윤서 · 주서</small></article>
+    <article class="office-card reveal"><strong>형조 <em>刑曹</em></strong><p>형벌·재판·법무를 담당하며 사건의 수사와 처분 절차에 관여하는 관청.</p><small>문지후 · 정랑</small></article>
+    <article class="office-card reveal"><strong>예문관 <em>藝文館</em></strong><p>왕명 문서와 교서, 기록과 문한 업무를 맡아 글과 기록을 다루는 관청.</p><small>서문령 · 검열</small></article>
+  </div>
+</section>
+`;
+  if(!html.includes('id="offices"')){
+    html = html.replace('<section class="section" id="case">', officesSection + '\n<section class="section" id="case">');
+  }
+
+  html = html.replace('<button data-target="world">세계관</button>\n      <button data-target="cast">등장인물</button>',
+                      '<button data-target="world">세계관</button>\n      <button data-target="offices">관청</button>\n      <button data-target="cast">등장인물</button>');
+  html = html.replace('<button class="nav-btn" data-target="world">세계관</button>\n    <button class="nav-btn" data-target="case">현재 사건</button>',
+                      '<button class="nav-btn" data-target="world">세계관</button>\n    <button class="nav-btn" data-target="offices">관청</button>\n    <button class="nav-btn" data-target="case">현재 사건</button>');
+  html = html.replace("const sectionIds = ['intro','fragment','world','case','cast','persona','commands','play'];",
+                      "const sectionIds = ['intro','fragment','world','offices','case','cast','persona','commands','play'];");
 
   return html;
 }
