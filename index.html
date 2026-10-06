@@ -15,9 +15,128 @@ body{overflow:hidden}
 <iframe id="page" title="삼생화 상세 소개"></iframe>
 <script>
 const files=Array.from({length:28},(_,i)=>"parts/part-"+String(i+1).padStart(2,"0")+".htmlpart");
+
+function patchDetailPage(html){
+  const extraCss = `
+<style id="samsaenghwa-v3-patch">
+.sample-dialogue{margin-top:16px;padding:0;background:transparent;border:0}
+.dialogue-head{display:flex;align-items:center;gap:10px;margin-bottom:9px}
+.dialogue-head::after{content:"";height:1px;flex:1;background:var(--line)}
+.dialogue-kicker{font-family:Georgia,"Times New Roman",serif;font-size:10px;letter-spacing:.16em;color:var(--rose);font-weight:700;white-space:nowrap}
+.dialogue-quote{margin:8px 0 0;padding:11px 13px;border:1px solid #ead8dc;background:rgba(255,251,249,.82);color:#6b4650;font-size:12.5px;line-height:1.65}
+.dialogue-quote+.dialogue-quote{margin-top:7px}
+#persona>h2{margin-bottom:25px}
+#persona>p{display:none!important}
+.persona-grid{gap:14px}
+.persona-card{padding:20px 20px 18px;border:1px solid var(--line);background:linear-gradient(145deg,rgba(255,255,255,.96),rgba(252,246,245,.94));box-shadow:0 10px 28px rgba(82,55,63,.045)}
+.persona-card::before{content:"";position:absolute;inset:0 auto 0 0;width:2px;background:linear-gradient(180deg,var(--rose2),transparent 78%)}
+.persona-index{display:none!important}
+.persona-card h3{display:flex;align-items:center;gap:9px;margin:0;font-size:16px}
+.persona-emoji{display:inline;width:auto;height:auto;flex:0 0 auto;border:0;border-radius:0;background:transparent;font-size:18px;line-height:1}
+.persona-mini{margin-left:auto;font-size:9px;font-weight:600;letter-spacing:.08em;color:#a68890;white-space:nowrap}
+.persona-card .examples{margin:13px 0 12px;padding-bottom:12px;border-bottom:1px solid #efe1e3;font-size:12.5px;color:#765a62}
+.persona-card dl{margin:0}
+.persona-card dl div{display:flex;gap:8px;align-items:baseline;border:0;padding:3px 0}
+.persona-card dt{flex:0 0 auto;font-size:9px;letter-spacing:.08em;color:#b08d95}
+.persona-card dd{margin:0;font-size:11.5px;color:#695159}
+.command-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:11px}
+.command-card{background:#fff;border:1px solid var(--line);padding:17px 18px;position:relative;overflow:hidden}
+.command-card::after{content:"";position:absolute;left:0;top:0;bottom:0;width:2px;background:var(--rose2)}
+.command-card code{display:inline-block;font-family:inherit;font-size:14px;font-weight:700;color:#5d3c46;background:#faf1f2;border:1px solid #ecdadd;padding:5px 9px;border-radius:4px}
+.command-card p{margin:10px 0 0;font-size:12px;line-height:1.65;color:#665058}
+.command-note{margin-top:14px;padding:15px 17px;border:1px solid var(--line);background:var(--paper2);font-size:12px;line-height:1.7;color:#705861}
+.command-note b{color:#553841}
+.command-head{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.command-usage{font-size:9px;line-height:1.4;letter-spacing:.03em;color:#aa8d95}
+@media(max-width:680px){.command-grid{grid-template-columns:1fr}.persona-card{padding:18px 17px 16px}}
+</style>`;
+
+  if(!html.includes('id="samsaenghwa-v3-patch"')){
+    html = html.replace('</head>', extraCss + '\n</head>');
+  }
+
+  const dialogues = [
+    ['“말하지 않아도 되는 일이라면 묻지 않겠습니다. 다만 사라지지는 마십시오.”','“가능성은 있습니다. 다만 지금 단정하진 않겠습니다. 원하시면 함께 다시 보시겠습니까?”'],
+    ['“돌려 말하지 마십시오. 그래서 뭘 원하는 겁니까.”','“믿으라고 한 적 없습니다. 제가 하는 걸 보십시오. 그다음 판단하면 됩니다.”'],
+    ['“그럴 줄 알았습니다. 그래서 밥은 드셨습니까?”','“편은 듭니다. 그렇다고 틀린 것까지 맞다고 해드리진 않습니다.”'],
+    ['“이상하군요. 방금 말씀과 기록 중 하나는 틀렸다는 뜻인데.”','“기록도 안 믿습니다. 사람만 특별히 의심하는 건 아닙니다. 공평하죠.”'],
+    ['“괜찮기는요. 얼굴이 그 모양인데. 일단 앉아요.”','“그럼 안 물어요. 대신 아픈 데까지 숨기지는 마요.”'],
+    ['“믿고 있습니다. 그러나 그 문서를 보여드릴 권한은 없습니다.”','“있습니다. 그래서 더 조심합니다. 없었다고 말하는 편이 오히려 무책임하겠지요.”']
+  ];
+
+  const oldQuotes = [
+    '“말하지 않아도 되는 일이라면 묻지 않겠습니다. 다만 사라지지는 마십시오.”',
+    '“돌려 말하지 마십시오. 그래서 뭘 원하는 겁니까.”',
+    '“그럴 줄 알았습니다. 그래서 밥은 드셨습니까?”',
+    '“이상하군요. 방금 말씀과 기록 중 하나는 틀렸다는 뜻인데.”',
+    '“괜찮기는요. 얼굴이 그 모양인데. 일단 앉아요.”',
+    '“믿고 있습니다. 그러나 그 문서를 보여드릴 권한은 없습니다.”'
+  ];
+
+  oldQuotes.forEach((q,i)=>{
+    const old = '<blockquote>'+q+'</blockquote>';
+    const d = dialogues[i];
+    const neu = '<div class="sample-dialogue"><div class="dialogue-head"><span class="dialogue-kicker">DIALOGUE EXAMPLES</span></div><p class="dialogue-quote">'+d[0]+'</p><p class="dialogue-quote">'+d[1]+'</p></div>';
+    if(html.includes(old)) html = html.replace(old, neu);
+  });
+
+  html = html.replace('<h2>USER 페르소나 추천</h2>','<h2>페르소나 추천</h2>');
+  html = html.replace('<p style="max-width:760px;margin-top:-7px;margin-bottom:24px;color:#705861;font-size:14px">전부 예시일 뿐입니다. 성별·성격·가문·세부 직업은 자유롭게 바꿔도 됩니다.</p>','');
+
+  const personas = [
+    ['기록을 만지는 사람','📜','문서 · 수사'],
+    ['북령과 연결된 사람','🐎','군문 · 물류'],
+    ['경화에서 먹고사는 사람','🏮','생활 · 경제'],
+    ['약재와 사람을 다루는 사람','🌿','약방 · 돌봄'],
+    ['관청 출입이 가능한 사람','🏛️','관료 · 정치'],
+    ['아무것도 모르는 외지인','🧳','자유 진입']
+  ];
+  personas.forEach(([title,emoji,note])=>{
+    const old='<h3>'+title+'</h3>';
+    const neu='<h3><span class="persona-emoji" aria-hidden="true">'+emoji+'</span>'+title+'<span class="persona-mini">'+note+'</span></h3>';
+    if(html.includes(old)) html=html.replace(old,neu);
+  });
+
+  const commandsSection = `
+<section class="section" id="commands">
+  <div class="kicker">CHAT COMMANDS</div>
+  <h2>필요할 때, 한 줄로 확인.</h2>
+  <p style="max-width:780px;margin-top:-7px;margin-bottom:24px;color:#705861;font-size:14px">채팅창에 그대로 입력해 현재 상태를 확인할 수 있습니다. 조회형 명령어는 장면을 진행하지 않고, 현재 공개된 정보만 보여줍니다.</p>
+  <div class="command-grid">
+    <article class="command-card reveal"><code>!상태</code><p>현재 날짜·시간·날씨·장소, 거처·생업·잔액과 사건 상태를 확인합니다.</p></article>
+    <article class="command-card reveal"><code>!관계</code><p>주요 인물과의 현재 공개 관계, 최근 접촉과 약속·갈등을 확인합니다.</p></article>
+    <article class="command-card reveal"><code>!사건</code><p>지금까지 확인한 사건 정보와 현재 가설, 아직 풀리지 않은 의문을 정리합니다.</p></article>
+    <article class="command-card reveal"><code>!기록</code><p>실제로 겪은 주요 사건과 확인된 기억·문서·증언을 다시 확인합니다.</p></article>
+    <article class="command-card reveal"><code>!생활</code><p>거처·생업·잔액·최근 거래·생활 약속처럼 현재 생활 상태를 확인합니다.</p></article>
+    <article class="command-card reveal"><code>!달력</code><p>오늘의 날짜·시간·날씨와 이미 공개된 일정, 실제로 잡힌 개인 약속을 확인합니다.</p></article>
+    <article class="command-card reveal"><code>!미션</code><p>현재 공개된 미션과 진행 가능한 목표, 최근 완료 기록을 확인합니다.</p></article>
+    <article class="command-card reveal"><code>!엔딩</code><p>실제로 달성해 기록된 엔딩만 확인합니다. 아직 없으면 빈 기록으로 표시됩니다.</p></article>
+    <article class="command-card reveal"><div class="command-head"><code>!캐붕점검</code><span class="command-usage">인물명 입력 · 예: !캐붕점검 류서겸</span></div><p>지정 인물의 공개된 성격·말투·행동을 기준으로 현재 캐릭터성 이탈 여부를 점검합니다.</p></article>
+    <article class="command-card reveal"><div class="command-head"><code>!오류수정</code><span class="command-usage">수정할 내용 입력</span></div><p>확정된 설정이나 현재 상태에서 발견한 오류만 점검하고 바로잡습니다.</p></article>
+  </div>
+  <div class="command-note reveal"><b>TIP</b> · 명령어는 정보를 확인하는 용도입니다. 관계·사건·미션·엔딩은 실제 RP에서 한 선택과 행동에 따라 달라집니다.</div>
+</section>
+`;
+  if(!html.includes('id="commands"')){
+    html = html.replace('<section class="section" id="play">', commandsSection + '\n<section class="section" id="play">');
+  }
+
+  html = html.replace('<button data-target="persona">추천 페르소나</button>\n      <button data-target="play">플레이 특징</button>',
+                      '<button data-target="persona">추천 페르소나</button>\n      <button data-target="commands">명령어</button>\n      <button data-target="play">플레이 특징</button>');
+  html = html.replace('<button class="nav-btn" data-target="persona">추천 페르소나</button>\n    <button class="nav-btn" data-target="play">플레이</button>',
+                      '<button class="nav-btn" data-target="persona">추천 페르소나</button>\n    <button class="nav-btn" data-target="commands">명령어</button>\n    <button class="nav-btn" data-target="play">플레이</button>');
+  html = html.replace('<button class="nav-btn" data-target="fragment">기억의 파편</button>\n    <button class="nav-btn" data-target="fragment">파편</button>',
+                      '<button class="nav-btn" data-target="fragment">파편</button>\n  <button class="nav-btn" data-target="commands">명령어</button>');
+  html = html.replace("const sectionIds = ['intro','fragment','world','case','cast','persona','play'];",
+                      "const sectionIds = ['intro','fragment','world','case','cast','persona','commands','play'];");
+
+  return html;
+}
+
 Promise.all(files.map(f=>fetch(f,{cache:"no-store"}).then(r=>{if(!r.ok) throw new Error(f); return r.text();})))
 .then(chunks=>{
-  const url=URL.createObjectURL(new Blob([chunks.join("")],{type:"text/html"}));
+  const patched = patchDetailPage(chunks.join(""));
+  const url=URL.createObjectURL(new Blob([patched],{type:"text/html"}));
   const frame=document.getElementById("page");
   frame.onload=()=>document.getElementById("loading").remove();
   frame.src=url;
