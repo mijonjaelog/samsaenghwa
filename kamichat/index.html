@@ -71,4 +71,5 @@ main{padding-bottom:50px}.section{padding:67px 0 0;scroll-margin-top:77px}.secti
 <script>
 document.querySelectorAll('.copy').forEach(function(btn){btn.addEventListener('click',async function(){var val=btn.getAttribute('data-copy');try{await navigator.clipboard.writeText(val);btn.textContent='복사됨';setTimeout(function(){btn.textContent='복사';},1300)}catch(err){btn.textContent='복사 불가';setTimeout(function(){btn.textContent='복사';},1300)}})});
 </script>
+<script src="character-photos.js" defer></script>
 </body></html>
