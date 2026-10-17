@@ -268,87 +268,74 @@ function patchKamichatPage(html){
 
 
 /* KAMICHAT LOCATIONS PATCH: preserves the original page, six portraits and existing ending definitions. */
-function patchKamichatPlaces(html){
+
+function patchKamichatPlaces(html,placesMarkup){
  const doc=new DOMParser().parseFromString(html,'text/html');
- if(doc.getElementById('kami-places'))return html;
+ const placeDoc=new DOMParser().parseFromString(placesMarkup,'text/html');
+ const work=placeDoc.querySelector('#places-work');
+ const background=placeDoc.querySelector('#places-background');
+ if(!work||!background)throw new Error('장소 이미지 원본 로딩 실패');
+ if(work.querySelectorAll('.place-card').length!==8||background.querySelectorAll('.place-card').length!==10)
+  throw new Error('장소 카드 개수가 다릅니다');
  const section=doc.createElement('section');
  section.className='section';
  section.id='kami-places';
- section.innerHTML=
-  '<div class="kicker">WORLD & DAILY LIFE</div>'+
-  '<h2>경화에서 살아가는 곳들</h2>'+
-  '<p style="max-width:780px;color:#795e68;font-size:13px;line-height:1.9;margin:0 0 14px">품삯과 생활 장소 8곳, 연국의 주요 배경 11곳. 첨부된 원본 그림을 바탕으로 장소명·구분·한 줄 소개를 정리했습니다.</p>'+
-  '<iframe id="kami-places-frame" title="삼생화 장소 19곳: 품삯 및 생활 공간과 주요 배경" src="https://mijonjaelog.github.io/samsaenghwa/kamichat/places.html" loading="eager" scrolling="no" style="width:100%;height:160px;border:0;background:#fffaf9;display:block"></iframe>';
- section.querySelector('p')?.remove();
+ section.innerHTML='<div class="kicker">WORLD & DAILY LIFE</div><h2>경화에서 살아가는 곳들</h2>';
+ const contents=doc.createElement('div');
+ contents.className='kami-places-content';
+ for(const original of [work,background]){
+  const subgroup=doc.createElement('div');
+  subgroup.className='kami-subsection';
+  subgroup.innerHTML=original.innerHTML;
+  subgroup.querySelectorAll('.places-section-note').forEach(node=>node.remove());
+  contents.appendChild(subgroup);
+ }
+ section.appendChild(contents);
  const endings=doc.getElementById('endings');
  const play=doc.getElementById('play');
  if(endings)endings.before(section);else if(play)play.before(section);else doc.body.appendChild(section);
- const nav=Array.from(doc.querySelectorAll('button[data-target="endings"],.nav-btn[data-target="endings"]'));
- nav.forEach(b=>{
-   const b2=b.cloneNode(true);
-   b2.setAttribute('data-target','kami-places');
-   b2.textContent='생활·장소';
-   b.before(b2);
+ doc.querySelectorAll('button[data-target="endings"],.nav-btn[data-target="endings"]').forEach(button=>{
+  const clone=button.cloneNode(true);
+  clone.dataset.target='kami-places';
+  clone.textContent='생활·장소';
+  button.before(clone);
  });
- const tightStyle=doc.createElement('style');
- tightStyle.id='kami-places-tight-layout';
- tightStyle.textContent='#kami-places{margin-bottom:8px!important;padding-bottom:0!important}#kami-places iframe{display:block;vertical-align:top;max-width:100%;min-width:0}#endings{margin-top:0!important}.sticky-nav .sticky-inner{max-width:1120px;scrollbar-width:none}.sticky-nav .sticky-inner::-webkit-scrollbar{display:none}';
- doc.head.appendChild(tightStyle);
- const st=doc.createElement('script');
- st.textContent=`
-(function(){
- var frame=document.getElementById('kami-places-frame');
- if(!frame)return;
- var lastHeight=0;
- function setHeight(raw){
-  var n=Number(raw);
-  if(!Number.isFinite(n)||n<100||n>40000)return;
-  var h=Math.ceil(n+2);
-  if(Math.abs(h-lastHeight)<2)return;
-  lastHeight=h;
-  frame.style.height=h+'px';
+ const sheet=doc.createElement('style');
+ sheet.id='kami-inline-places-v3';
+ sheet.textContent="\n#kami-places .kami-places-content{max-width:1060px;margin:0 auto}\n#kami-places .kami-places-content>.kami-subsection{padding:22px 0 26px;scroll-margin-top:96px}\n#kami-places .kami-places-content>.kami-subsection+.kami-subsection{padding-top:39px}\n#kami-places .kami-subsection .kicker{font-size:11px;letter-spacing:.15em;color:#aa7081;font-weight:700}\n#kami-places .places-title-row{display:flex;justify-content:space-between;align-items:center;gap:12px}\n#kami-places .places-title-row h2{font-size:clamp(23px,3vw,30px);margin:14px 0;letter-spacing:-.03em}\n#kami-places .places-count{font-size:11px;color:#a35c72;border:1px solid #e7c5cd;border-radius:40px;padding:5px 11px;background:#fff7f8;white-space:nowrap}\n#kami-places .places-intro{color:#79646a;max-width:750px;font-size:13px;line-height:1.8;margin:0 0 22px}\n#kami-places .places-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}\n#kami-places .place-card{overflow:hidden;border:1px solid #ead8dc;border-radius:8px;background:#fff;box-shadow:0 8px 23px rgba(80,47,60,.05);min-width:0}\n#kami-places .place-image-link{display:block;aspect-ratio:4/5;background:#eee0e3;overflow:hidden}\n#kami-places .place-image-link img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .24s}\n#kami-places .place-image-link:hover img{transform:scale(1.04)}\n#kami-places .place-body{padding:14px 15px 17px}\n#kami-places .place-kind{font-size:11px;line-height:1.5;color:#b07484}\n#kami-places .place-body h3{font-size:15px;line-height:1.5;color:#563842;margin:6px 0}\n#kami-places .place-body p{font-size:12px;line-height:1.7;color:#79636b;margin:0}\n#kami-places .places-section-note{display:none}\n@media(max-width:900px){#kami-places .places-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}}\n@media(max-width:480px){#kami-places .places-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}#kami-places .place-body{padding:11px}#kami-places .place-body h3{font-size:13px}#kami-places .place-body p{font-size:11px}#kami-places .places-count{font-size:10px}}\n";
+ doc.head.appendChild(sheet);
+ // Disable the original observer, which did not know about newly-added sections.
+ for(const script of doc.querySelectorAll('script')){
+  const code=script.textContent||'';
+  if(!code.includes('const sectionIds')||!code.includes('const observer = new IntersectionObserver'))continue;
+  const newCode=code.replace(/const observer = new IntersectionObserver\([\s\S]*?sections\.forEach\(s => observer\.observe\(s\)\);/,
+   '/* replaced by kami-scrollspy-v3 */');
+  if(newCode===code)throw new Error('기존 메뉴 감지 코드 교체 실패');
+  script.textContent=newCode;
  }
- function measure(){
-  try{
-   var d=frame.contentDocument;
-   if(!d||!d.body)return;
-   setHeight(Math.max(d.documentElement.scrollHeight,d.body.scrollHeight));
-  }catch(e){}
- }
- window.addEventListener('message',function(e){
-  if(e.source!==frame.contentWindow||!e.data||e.data.type!=='samsaenghwa-places-height')return;
-  if(e.origin!==location.origin&&e.origin!=='null')return;
-  setHeight(e.data.height);
- });
- frame.addEventListener('load',function(){
-  measure();
-  setTimeout(measure,120);
-  setTimeout(measure,700);
- });
- window.addEventListener('resize',measure,{passive:true});
- setTimeout(measure,250);
- setTimeout(measure,1100);
-})();
-`;
- doc.body.appendChild(st);
-
- for(const scr of doc.querySelectorAll('script')){let text=scr.textContent||'';if(text.includes('const sectionIds')&&text.includes('const observer = new IntersectionObserver')){text=text.replace(/const sectionIds = \[[^\]]*\];/,"const sectionIds = ['intro','fragment','world','offices','case','cast','persona','commands','kami-places','endings','play'];");text=text.replace(/const observer = new IntersectionObserver\([\s\S]*?sections\.forEach\(s => observer\.observe\(s\)\);/,'/* Active tab synchronization delegated to kami-scrollspy */');scr.textContent=text;}}
- const activeStyle=doc.createElement('style');activeStyle.textContent="html{scroll-padding-top:0}.section{scroll-margin-top:calc(var(--kami-header-h,90px) + 15px)}.sticky-nav .nav-btn.active,.mobile-dock .nav-btn.active{background:#a75a6f!important;color:#fff!important;border-color:#a75a6f!important}.sticky-inner,.mobile-dock{scrollbar-width:none;-webkit-overflow-scrolling:touch}.sticky-inner::-webkit-scrollbar,.mobile-dock::-webkit-scrollbar{display:none}@media(max-width:720px){.sticky-inner,.mobile-dock{max-width:100%;overflow-x:auto}}";doc.head.appendChild(activeStyle);
- const activeScript=doc.createElement('script');activeScript.id='kami-scrollspy-v2';activeScript.textContent="(()=>{const ids=['intro','fragment','world','offices','case','cast','persona','commands','kami-places','endings','play'];const btns=[...document.querySelectorAll('.sticky-nav .nav-btn,.mobile-dock .nav-btn')];const header=document.querySelector('.sticky-nav');let current='',hold=0,raf=0;function apply(id,click=false){if(current===id&&!click)return;current=id;for(const b of btns){let yes=b.dataset.target===id;b.classList.toggle('active',yes);if(yes)b.setAttribute('aria-current','location');else b.removeAttribute('aria-current')}const b=btns.find(x=>x.dataset.target===id&&x.closest('.sticky-nav'))||btns.find(x=>x.dataset.target===id);const rail=b?.parentElement;if(rail?.scrollWidth>rail?.clientWidth+10)rail.scrollTo({left:Math.max(0,b.offsetLeft-(rail.clientWidth-b.offsetWidth)/2),behavior:'instant'})}function read(){raf=0;if(performance.now()<hold)return;const h=Math.max(60,header?.getBoundingClientRect().height||80);document.documentElement.style.setProperty('--kami-header-h',h+'px');let id='intro';for(const x of ids){const el=document.getElementById(x);if(el&&el.getBoundingClientRect().top<=h+38)id=x}if(innerHeight+scrollY>=document.documentElement.scrollHeight-3)id='play';apply(id)}const schedule=()=>{if(!raf)raf=requestAnimationFrame(read)};for(const b of btns)b.addEventListener('click',()=>{if(ids.includes(b.dataset.target)){apply(b.dataset.target,true);hold=performance.now()+310;setTimeout(()=>{hold=0;schedule()},450)}});addEventListener('scroll',schedule,{passive:true});addEventListener('resize',schedule,{passive:true});if('ResizeObserver' in window){const ro=new ResizeObserver(schedule);if(header)ro.observe(header);const place=document.getElementById('kami-places');if(place)ro.observe(place)}document.fonts?.ready.then(schedule);addEventListener('load',schedule);schedule()})();";doc.body.appendChild(activeScript);
+ const navCss=doc.createElement('style');
+ navCss.id='kami-active-menu-v3';
+ navCss.textContent='header .nav-btn.active,.mobile-dock .nav-btn.active{background:#a75a6f!important;color:white!important;border-color:#a75a6f!important}html{scroll-padding-top:0}#kami-places{scroll-margin-top:85px}';
+ doc.head.appendChild(navCss);
+ const navJs=doc.createElement('script');
+ navJs.id='kami-scrollspy-v3';
+ navJs.textContent="(function(){\n'use strict';\nconst NAV=[...document.querySelectorAll('header [data-target], .mobile-dock [data-target]')];\nconst IDS=[...new Set(NAV.map(b=>b.dataset.target))].filter(id=>!!document.getElementById(id));\nconst HEAD=document.querySelector('header');\nlet active='',pending=0,holdUntil=0;\nfunction h(){return Math.ceil(HEAD?.getBoundingClientRect().height||75)}\nfunction select(id,force){\n if(!id||(active===id&&!force))return;\n active=id;\n for(const b of NAV){\n  const on=b.dataset.target===id;\n  b.classList.toggle('active',on);\n  if(on)b.setAttribute('aria-current','location');else b.removeAttribute('aria-current');\n }\n const current=NAV.find(b=>b.dataset.target===id&&b.closest('header'))||NAV.find(b=>b.dataset.target===id);\n const rail=current?.parentElement;\n if(rail&&rail.scrollWidth>rail.clientWidth+12)rail.scrollTo({left:Math.max(0,current.offsetLeft-(rail.clientWidth-current.offsetWidth)/2),behavior:'instant'});\n}\nfunction scan(){\n pending=0;\n if(performance.now()<holdUntil)return;\n const marker=h()+Math.min(110,innerHeight*0.19);\n let best=IDS[0];\n for(const id of IDS){\n  const section=document.getElementById(id);\n  if(section&&section.getBoundingClientRect().top<=marker)best=id;\n }\n if(innerHeight+scrollY>=document.documentElement.scrollHeight-4)best=IDS[IDS.length-1];\n select(best);\n}\nfunction sync(){if(!pending)pending=requestAnimationFrame(scan)}\nfor(const btn of NAV)btn.addEventListener('click',()=>{\n const id=btn.dataset.target;\n if(!IDS.includes(id))return;\n select(id,true);\n holdUntil=performance.now()+500;\n setTimeout(()=>{holdUntil=0;sync()},620);\n});\naddEventListener('scroll',sync,{passive:true});\naddEventListener('resize',sync,{passive:true});\naddEventListener('pageshow',sync);\nif('ResizeObserver'in window){const observer=new ResizeObserver(sync);if(HEAD)observer.observe(HEAD)}\ndocument.fonts?.ready.then(sync);sync();\n})();";
+ doc.body.appendChild(navJs);
  return '<!doctype html>\n'+doc.documentElement.outerHTML;
 }
 
-Promise.all(files.map(f=>fetch(f,{cache:"no-store"}).then(r=>{if(!r.ok) throw new Error(f); return r.text();})))
-.then(chunks=>{
-  const patched = patchKamichatPlaces(patchKamichatPage(patchDetailPage(chunks.join(""))));
-  const url=URL.createObjectURL(new Blob([patched],{type:"text/html"}));
-  const frame=document.getElementById("page");
-  frame.onload=()=>document.getElementById("loading").remove();
-  frame.src=url;
+Promise.all([
+ Promise.all(files.map(f=>fetch(f,{cache:"no-store"}).then(r=>{if(!r.ok)throw new Error(f);return r.text();}))),
+ fetch("places.html",{cache:"no-store"}).then(r=>{if(!r.ok)throw new Error("places.html");return r.text();})
+])
+.then(([chunks,placesMarkup])=>{
+ const patched=patchKamichatPlaces(patchKamichatPage(patchDetailPage(chunks.join(""))),placesMarkup);
+ const url=URL.createObjectURL(new Blob([patched],{type:"text/html"}));
+ const frame=document.getElementById("page");
+ frame.onload=()=>document.getElementById("loading")?.remove();
+ frame.src=url;
 })
-.catch(err=>{
-  document.getElementById("loading").textContent="페이지를 불러오지 못했습니다: "+err.message;
-});
+.catch(err=>{document.getElementById("loading").textContent="페이지를 불러오지 못했습니다: "+err.message;});
 </script>
 </body>
 </html>
