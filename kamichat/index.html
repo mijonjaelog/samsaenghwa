@@ -208,134 +208,93 @@ function patchDetailPage(html){
 }
 
 
-/* KAMICHAT COPY PATCH
-   Only slash-commands and ten-ending public section are changed.
-   Preserve all images, cast data, portraits, original original CSS and pages.
-*/
-function patchKamichatPage(html){
-  const doc=new DOMParser().parseFromString(html,'text/html');
-  doc.title='삼생화 三生花 | 카미챗 상세 소개';
-  const commands=doc.getElementById('commands');
-  if(commands){
-    const walker=doc.createTreeWalker(commands,NodeFilter.SHOW_TEXT);
-    const nodes=[];while(walker.nextNode())nodes.push(walker.currentNode);
-    nodes.forEach(node=>{node.nodeValue=node.nodeValue.replace(/!([가-힣]+)/g,'/$1');});
-  }
-  const list=[["E01","각자의 봄","COMMON","비연애 · 공동체 정착"],["E02","내가 고른 계절","COMMON","비연애 · 독립적인 새 출발"],["E03","북령으로 가는 길","RARE","위무진"],["E04","평범한 저녁의 약속","RARE","문지후"],["E05","기록 밖의 이름","RARE","서문령"],["E06","청연당의 여름","RARE","한소담"],["E07","남겨진 여백","RARE","신윤서"],["E08","꽃이 진 뒤에도","EPIC","류서겸"],["E09","두 번의 봄을 지나","EPIC","삼생 진실 · 연애 선택 무관"],["E10","삼생화","LEGENDARY","장기 누적 · 특정 연애 상대 없음"]];
-  const section=doc.createElement('section');
-  section.className='section';
-  section.id='endings';
-  section.innerHTML=
-    '<div class="kicker">ENDING COLLECTION · 10</div>'+
-    '<h2>세 번의 봄, 열 가지 결말.</h2>'+
-    '<p class="kami-ending-intro">각자가 걸어간 길 끝에는 서로 다른 결말이 남습니다. 아래는 공개 엔딩의 이름과 담당 인물입니다. 해금 조건과 숨겨진 사건의 진상은 공개하지 않습니다.</p>'+
-    '<div class="kami-ending-grid">'+list.map(([number,name,rarity,owner])=>
-      '<article class="kami-ending-item">'+
-      '<span class="kami-ending-id">'+number+'</span>'+
-      '<div><div class="kami-ending-heading"><h3>'+name+'</h3><span class="kami-ending-rarity">'+rarity+'</span></div>'+
-      '<p class="kami-ending-owner">'+owner+'</p></div></article>'
-    ).join('')+'</div>'+
-    '<p class="kami-ending-foot">COMMON 2 · RARE 5 · EPIC 2 · LEGENDARY 1<br>카미챗에서는 /엔딩 명령어로 실제 달성한 엔딩 기록을 조회합니다. 달성 조건은 플레이 중 공개되는 정보만 적용합니다.</p>';
-  section.querySelector('.kami-ending-foot')?.remove();
-  const play=doc.getElementById('play');
-  if(play)play.before(section);else doc.body.appendChild(section);
-  const css=doc.createElement('style');
-  css.id='kami-endings-extension';
-  css.textContent=
-   '.kami-ending-intro{max-width:780px;margin:6px 0 23px;color:#795e68;font-size:13px;line-height:1.8}'+
-   '.kami-ending-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}'+
-   '.kami-ending-item{display:flex;align-items:flex-start;gap:14px;padding:19px 20px;border:1px solid var(--line,#e9d7da);border-radius:5px;background:linear-gradient(150deg,#fff,#fff9f8)}'+
-   '.kami-ending-id{flex:0 0 35px;color:var(--rose,#ae6577);font:700 12px Georgia,serif;padding-top:5px}'+
-   '.kami-ending-heading{display:flex;gap:9px;align-items:center;flex-wrap:wrap}'+
-   '.kami-ending-heading h3{font-size:16px;line-height:1.4;color:#553740;margin:0}'+
-   '.kami-ending-rarity{border:1px solid #e4cad1;border-radius:99px;background:#fff6f7;color:#a16676;font:700 9px Arial,sans-serif;letter-spacing:.03em;padding:3px 8px}'+
-   '.kami-ending-owner{font-size:12px;color:#8d6673;margin:7px 0 0}'+
-   '.kami-ending-foot{margin:19px 0 0;border:1px solid var(--line,#e9d7da);background:#fbf2f3;padding:15px 17px;font-size:12px;color:#84646f;line-height:1.9}'+
-   '@media(max-width:680px){.kami-ending-grid{grid-template-columns:1fr}.kami-ending-item{padding:16px 17px}}';
-  doc.head.appendChild(css);
-  // Preserve existing navigation style by cloning the page's own PLAY button.
-  for(const button of doc.querySelectorAll('button[data-target="play"]')){
-    const clone=button.cloneNode(true);
-    clone.setAttribute('data-target','endings');
-    clone.textContent='엔딩 10종';
-    button.before(clone);
-  }
-  let output='<!doctype html>\n'+doc.documentElement.outerHTML;
-  // The original scroll/navigation code enumerates section IDs explicitly.
-  output=output.replace(/(const\s+sectionIds\s*=\s*\[[^\]]*?)'play'(\s*\];)/g,(_m,a,b)=>a+"'endings','play'"+b);
-  return output;
-}
 
-
-/* KAMICHAT LOCATIONS PATCH: preserves the original page, six portraits and existing ending definitions. */
-
-function patchKamichatPlaces(html,placesMarkup){
+/* PLATFORM PAGE: original character imagery and text remain unchanged.
+   The same layout and scroll tracking are applied to Doomchit and Kamichat. */
+function extendSamsaenghwaPage(html, placesMarkup, platform) {
  const doc=new DOMParser().parseFromString(html,'text/html');
- const placeDoc=new DOMParser().parseFromString(placesMarkup,'text/html');
- const work=placeDoc.querySelector('#places-work');
- const background=placeDoc.querySelector('#places-background');
- if(!work||!background)throw new Error('장소 이미지 원본 로딩 실패');
- if(work.querySelectorAll('.place-card').length!==8||background.querySelectorAll('.place-card').length!==10)
-  throw new Error('장소 카드 개수가 다릅니다');
- const section=doc.createElement('section');
- section.className='section';
- section.id='kami-places';
- section.innerHTML='<div class="kicker">WORLD & DAILY LIFE</div><h2>경화에서 살아가는 곳들</h2>';
- const contents=doc.createElement('div');
- contents.className='kami-places-content';
- for(const original of [work,background]){
-  const subgroup=doc.createElement('div');
-  subgroup.className='kami-subsection';
-  subgroup.innerHTML=original.innerHTML;
-  subgroup.querySelectorAll('.places-section-note').forEach(node=>node.remove());
-  contents.appendChild(subgroup);
+ const rawPlaces=new DOMParser().parseFromString(placesMarkup,'text/html');
+ const isKami=platform==='kamichat';
+ doc.title='삼생화 三生花 | '+(isKami?'카미챗':'둠칫')+' 상세 소개';
+ const commands=doc.querySelector('#commands');
+ if(isKami&&commands){
+   const walker=doc.createTreeWalker(commands,NodeFilter.SHOW_TEXT);
+   let node;while((node=walker.nextNode()))node.nodeValue=node.nodeValue.replace(/!([가-힣]+)/g,'/$1');
  }
- section.appendChild(contents);
- const endings=doc.getElementById('endings');
+ const list=ENDING_RECORDS;
+ const ep=doc.createElement('section');
+ ep.id='endings';ep.className='section';
+ ep.innerHTML='<div class="kicker">ENDING COLLECTION</div>'+
+   '<h2>세 번의 봄, 열 가지 결말.</h2>'+
+   '<p class="ending-intro">각자가 걸어온 길 끝에 서로 다른 결말이 남습니다. 엔딩 이름과 담당 인물을 소개하며, 달성 조건과 숨겨진 진상은 공개하지 않습니다.</p>'+
+   '<div class="ending-collection">'+list.map(([id,name,rank,npc])=>
+    '<article class="ending-card"><span class="ending-id">'+id+'</span><div class="ending-info">'+
+    '<div class="ending-title-row"><h3>'+name+'</h3><span class="ending-rank">'+rank+'</span></div>'+
+    '<p class="ending-owner">'+npc+'</p></div></article>').join('')+'</div>';
+ const placeSection=doc.createElement('section');
+ placeSection.id='places';placeSection.className='section';
+ placeSection.innerHTML='<div class="kicker">WORLD & DAILY LIFE</div><h2>경화에서 살아가는 곳들</h2>';
+ const placeWrap=doc.createElement('div');
+ placeWrap.className='page-places';
+ for(const [id,count] of [['places-work',8],['places-background',10]]){
+  const group=rawPlaces.getElementById(id);
+  if(!group||group.querySelectorAll('.place-card').length!==count)throw Error('장소 '+id+' 이미지 개수 불일치');
+  const part=doc.createElement('div');
+  part.className='page-places-group';
+  part.innerHTML=group.innerHTML;
+  part.querySelectorAll('.places-section-note').forEach(x=>x.remove());
+  placeWrap.appendChild(part);
+ }
+ placeSection.appendChild(placeWrap);
  const play=doc.getElementById('play');
- if(endings)endings.before(section);else if(play)play.before(section);else doc.body.appendChild(section);
- doc.querySelectorAll('button[data-target="endings"],.nav-btn[data-target="endings"]').forEach(button=>{
-  const clone=button.cloneNode(true);
-  clone.dataset.target='kami-places';
-  clone.textContent='생활·장소';
-  button.before(clone);
- });
- const sheet=doc.createElement('style');
- sheet.id='kami-inline-places-v3';
- sheet.textContent="\n#kami-places .kami-places-content{max-width:1060px;margin:0 auto}\n#kami-places .kami-places-content>.kami-subsection{padding:22px 0 26px;scroll-margin-top:96px}\n#kami-places .kami-places-content>.kami-subsection+.kami-subsection{padding-top:39px}\n#kami-places .kami-subsection .kicker{font-size:11px;letter-spacing:.15em;color:#aa7081;font-weight:700}\n#kami-places .places-title-row{display:flex;justify-content:space-between;align-items:center;gap:12px}\n#kami-places .places-title-row h2{font-size:clamp(23px,3vw,30px);margin:14px 0;letter-spacing:-.03em}\n#kami-places .places-count{font-size:11px;color:#a35c72;border:1px solid #e7c5cd;border-radius:40px;padding:5px 11px;background:#fff7f8;white-space:nowrap}\n#kami-places .places-intro{color:#79646a;max-width:750px;font-size:13px;line-height:1.8;margin:0 0 22px}\n#kami-places .places-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}\n#kami-places .place-card{overflow:hidden;border:1px solid #ead8dc;border-radius:8px;background:#fff;box-shadow:0 8px 23px rgba(80,47,60,.05);min-width:0}\n#kami-places .place-image-link{display:block;aspect-ratio:4/5;background:#eee0e3;overflow:hidden}\n#kami-places .place-image-link img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .24s}\n#kami-places .place-image-link:hover img{transform:scale(1.04)}\n#kami-places .place-body{padding:14px 15px 17px}\n#kami-places .place-kind{font-size:11px;line-height:1.5;color:#b07484}\n#kami-places .place-body h3{font-size:15px;line-height:1.5;color:#563842;margin:6px 0}\n#kami-places .place-body p{font-size:12px;line-height:1.7;color:#79636b;margin:0}\n#kami-places .places-section-note{display:none}\n@media(max-width:900px){#kami-places .places-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}}\n@media(max-width:480px){#kami-places .places-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}#kami-places .place-body{padding:11px}#kami-places .place-body h3{font-size:13px}#kami-places .place-body p{font-size:11px}#kami-places .places-count{font-size:10px}}\n";
- doc.head.appendChild(sheet);
- // Disable the original observer, which did not know about newly-added sections.
- for(const script of doc.querySelectorAll('script')){
-  const code=script.textContent||'';
-  if(!code.includes('const sectionIds')||!code.includes('const observer = new IntersectionObserver'))continue;
-  const newCode=code.replace(/const observer = new IntersectionObserver\([\s\S]*?sections\.forEach\(s => observer\.observe\(s\)\);/,
-   '/* replaced by kami-scrollspy-v3 */');
-  if(newCode===code)throw new Error('기존 메뉴 감지 코드 교체 실패');
-  script.textContent=newCode;
+ if(!play)throw Error('원본 플레이 섹션을 찾을 수 없습니다');
+ play.before(placeSection,ep);
+ // Add both new targets before the existing Play button, matching page order.
+ for(const menu of doc.querySelectorAll('.sticky-nav,.mobile-dock')){
+  const playButton=menu.querySelector('button[data-target="play"]');
+  if(!playButton)continue;
+  for(const [id,label] of [['places','생활·장소'],['endings','엔딩 10종']]){
+   const btn=playButton.cloneNode(true);
+   btn.classList.remove('active');
+   btn.dataset.target=id;btn.textContent=label;
+   playButton.before(btn);
+  }
  }
- const navCss=doc.createElement('style');
- navCss.id='kami-active-menu-v3';
- navCss.textContent='.sticky-nav .nav-btn.active,.mobile-dock .nav-btn.active{background:#a75a6f!important;color:white!important;border-color:#a75a6f!important}html{scroll-padding-top:0}#kami-places{scroll-margin-top:85px}';
- doc.head.appendChild(navCss);
- const navJs=doc.createElement('script');
- navJs.id='kami-scrollspy-v3';
- navJs.textContent="(function(){\n'use strict';\nconst NAV=[...document.querySelectorAll('.sticky-nav [data-target], .mobile-dock [data-target]')];\nconst IDS=[...new Set(NAV.map(b=>b.dataset.target))].filter(id=>!!document.getElementById(id));\nconst HEAD=document.querySelector('.sticky-nav');\nlet active='',pending=0,holdUntil=0;\nfunction h(){return Math.ceil(HEAD?.getBoundingClientRect().height||75)}\nfunction select(id,force){\n if(!id||(active===id&&!force))return;\n active=id;\n for(const b of NAV){\n  const on=b.dataset.target===id;\n  b.classList.toggle('active',on);\n  if(on)b.setAttribute('aria-current','location');else b.removeAttribute('aria-current');\n }\n const current=NAV.find(b=>b.dataset.target===id&&b.closest('.sticky-nav'))||NAV.find(b=>b.dataset.target===id);\n const rail=current?.parentElement;\n if(rail&&rail.scrollWidth>rail.clientWidth+12)rail.scrollTo({left:Math.max(0,current.offsetLeft-(rail.clientWidth-current.offsetWidth)/2),behavior:'instant'});\n}\nfunction scan(){\n pending=0;\n if(performance.now()<holdUntil)return;\n const marker=h()+Math.min(110,innerHeight*0.19);\n let best=IDS[0];\n for(const id of IDS){\n  const section=document.getElementById(id);\n  if(section&&section.getBoundingClientRect().top<=marker)best=id;\n }\n if(innerHeight+scrollY>=document.documentElement.scrollHeight-4)best=IDS[IDS.length-1];\n select(best);\n}\nfunction sync(){if(!pending)pending=requestAnimationFrame(scan)}\nfor(const btn of NAV)btn.addEventListener('click',()=>{\n const id=btn.dataset.target;\n if(!IDS.includes(id))return;\n select(id,true);\n holdUntil=performance.now()+500;\n setTimeout(()=>{holdUntil=0;sync()},620);\n});\naddEventListener('scroll',sync,{passive:true});\naddEventListener('resize',sync,{passive:true});\naddEventListener('pageshow',sync);\nif('ResizeObserver'in window){const observer=new ResizeObserver(sync);if(HEAD)observer.observe(HEAD)}\ndocument.fonts?.ready.then(sync);sync();\n})();";
- doc.body.appendChild(navJs);
+ const jump=doc.querySelector('.jump-grid');
+ if(jump){const before=jump.querySelector('button[data-target="play"]');if(before)for(const [id,label] of [['places','생활·장소'],['endings','엔딩 10종']]){const btn=before.cloneNode(true);btn.dataset.target=id;btn.textContent=label;before.before(btn)}}
+ // Disable incomplete 7-section IntersectionObserver from the original.
+ for(const node of doc.querySelectorAll('script')){
+  let txt=node.textContent||'';
+  if(!txt.includes('const sectionIds')||!txt.includes('const observer = new IntersectionObserver'))continue;
+  const revised=txt.replace(/const observer = new IntersectionObserver\([\s\S]*?sections\.forEach\(s => observer\.observe\(s\)\);/,
+     '/* Unified eleven-section scroll tracker replaces the old partial observer. */');
+  if(revised===txt)throw Error('메뉴 감지 코드가 교체되지 않았습니다');
+  node.textContent=revised;
+ }
+ const style=doc.createElement('style');
+ style.id='samsaenghwa-unified-extension';
+ style.textContent=UNIFIED_STYLE;
+ doc.head.appendChild(style);
+ const script=doc.createElement('script');
+ script.id='samsaenghwa-unified-navigation';
+ script.textContent=SCROLL_TRACKING_JS;
+ doc.body.appendChild(script);
  return '<!doctype html>\n'+doc.documentElement.outerHTML;
 }
+const ENDING_RECORDS=[["E01","각자의 봄","COMMON","비연애 · 공동체 정착"],["E02","내가 고른 계절","COMMON","비연애 · 독립적인 새 출발"],["E03","북령으로 가는 길","RARE","위무진"],["E04","평범한 저녁의 약속","RARE","문지후"],["E05","기록 밖의 이름","RARE","서문령"],["E06","청연당의 여름","RARE","한소담"],["E07","남겨진 여백","RARE","신윤서"],["E08","꽃이 진 뒤에도","EPIC","류서겸"],["E09","두 번의 봄을 지나","EPIC","삼생 진실 · 연애 선택 무관"],["E10","삼생화","LEGENDARY","장기 누적 · 특정 연애 상대 없음"]];
+const UNIFIED_STYLE="\n/* Both sites keep the existing paper palette and portraits. */\n#places .page-places{max-width:1080px;margin:0 auto}\n#places .page-places-group{padding:24px 0 17px}\n#places .page-places-group+.page-places-group{padding-top:35px}\n#places .page-places-group .kicker{font:700 11px/1.5 Georgia,serif;letter-spacing:.16em;color:var(--rose,#af7886)}\n#places .places-title-row{display:flex;align-items:center;justify-content:space-between;gap:12px}\n#places .places-title-row h2{font-size:clamp(22px,3.2vw,29px);margin:12px 0 14px}\n#places .places-count{font:600 11px Arial,sans-serif;color:#a96577;border:1px solid #e5c8d0;background:#fff7f8;padding:6px 11px;border-radius:100px;white-space:nowrap}\n#places .places-intro{font-size:13px;line-height:1.8;color:#7d626c;margin:0 0 20px}\n#places .places-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:13px}\n#places .place-card{min-width:0;overflow:hidden;border:1px solid var(--line,#e9d8da);border-radius:7px;background:#fff;box-shadow:0 8px 24px rgba(75,38,52,.045)}\n#places .place-image-link{display:block;aspect-ratio:4/5;overflow:hidden;background:#f2e7ea}\n#places .place-image-link img{display:block;width:100%;height:100%;object-fit:cover;transition:transform .25s}\n#places .place-image-link:hover img{transform:scale(1.035)}\n#places .place-body{padding:14px 15px 16px}\n#places .place-kind{font-size:11px;color:#b07989}\n#places .place-body h3{font-size:15px;line-height:1.5;color:#553941;margin:6px 0 8px}\n#places .place-body p{font-size:12px;line-height:1.7;color:#7b646d;margin:0}\n#endings .ending-intro{font-size:13px;color:#7f626e;line-height:1.8;margin:5px 0 22px}\n#endings .ending-collection{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}\n#endings .ending-card{display:flex;align-items:flex-start;gap:15px;min-width:0;padding:20px;border:1px solid var(--line,#e8d8dc);border-radius:5px;background:linear-gradient(135deg,#fff,#fff9f7)}\n#endings .ending-id{flex:0 0 35px;color:#b57989;font:700 12px Georgia,serif;margin-top:6px}\n#endings .ending-title-row{display:flex;flex-wrap:wrap;align-items:center;gap:9px}\n#endings .ending-title-row h3{font-size:16px;color:#563b43;margin:0}\n#endings .ending-rank{font:700 9px Arial,sans-serif;letter-spacing:.04em;color:#aa6e7e;border:1px solid #e6cbd0;border-radius:100px;padding:4px 8px;background:#fff9fa}\n#endings .ending-owner{font-size:12px;color:#8c6975;margin:7px 0 0}\n.sticky-nav .nav-btn.active,.mobile-dock .nav-btn.active{color:#fff!important;background:#a55c70!important;border-color:#a55c70!important}\n.sticky-nav .sticky-inner{max-width:100%;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch}\n.sticky-nav .sticky-inner::-webkit-scrollbar{display:none}\n.section#places,.section#endings{scroll-margin-top:74px}\n@media(max-width:850px){#places .places-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}\n@media(max-width:680px){#endings .ending-collection{grid-template-columns:1fr}}\n@media(max-width:440px){#places .places-grid{gap:9px}#places .place-body{padding:10px}#places .place-body h3{font-size:13px}#places .place-body p{font-size:11px}}\n@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}";
+const SCROLL_TRACKING_JS="(function(){\n'use strict';\nconst menu=[...document.querySelectorAll('.sticky-nav .nav-btn,.mobile-dock .nav-btn')];\nconst nav=document.querySelector('.sticky-nav');\nconst targets=[...new Set(document.querySelectorAll('.sticky-nav .nav-btn'))].map(b=>b.dataset.target).filter(id=>document.getElementById(id));\nlet current='',frame=0,holdUntil=0;\nfunction choose(id,force){\n if(!id||(id===current&&!force))return;\n current=id;\n for(const button of menu){const yes=button.dataset.target===id;button.classList.toggle('active',yes);if(yes)button.setAttribute('aria-current','location');else button.removeAttribute('aria-current')}\n const btn=menu.find(b=>b.dataset.target===id&&b.closest('.sticky-nav'));\n const rail=btn?.parentElement;\n if(rail&&rail.scrollWidth>rail.clientWidth+8){\n  const left=btn.offsetLeft-(rail.clientWidth-btn.offsetWidth)/2;\n  rail.scrollTo({left:Math.max(0,left),behavior:'instant'});\n }\n}\nfunction sync(){\n frame=0;if(performance.now()<holdUntil)return;\n const marker=(nav?.getBoundingClientRect().height||60)+Math.min(110,innerHeight*.17);\n let id=targets[0];\n for(const target of targets){const el=document.getElementById(target);if(el&&el.getBoundingClientRect().top<=marker)id=target}\n if(innerHeight+scrollY>=document.documentElement.scrollHeight-3)id=targets[targets.length-1];\n choose(id);\n}\nfunction request(){if(!frame)frame=requestAnimationFrame(sync)}\nfor(const btn of menu)btn.addEventListener('click',()=>{\n const id=btn.dataset.target;if(!targets.includes(id))return;\n choose(id,true);holdUntil=performance.now()+460;\n setTimeout(()=>{holdUntil=0;request()},580);\n});\naddEventListener('scroll',request,{passive:true});addEventListener('resize',request,{passive:true});\naddEventListener('pageshow',request);\nif('ResizeObserver'in window){const ro=new ResizeObserver(request);if(nav)ro.observe(nav)}\ndocument.fonts?.ready.then(request);request();\n})();";
 
 Promise.all([
- Promise.all(files.map(f=>fetch(f,{cache:"no-store"}).then(r=>{if(!r.ok)throw new Error(f);return r.text();}))),
- fetch("places.html",{cache:"no-store"}).then(r=>{if(!r.ok)throw new Error("places.html");return r.text();})
-])
-.then(([chunks,placesMarkup])=>{
- const patched=patchKamichatPlaces(patchKamichatPage(patchDetailPage(chunks.join(""))),placesMarkup);
- const url=URL.createObjectURL(new Blob([patched],{type:"text/html"}));
+ Promise.all(files.map(f=>fetch(f,{cache:"no-store"}).then(r=>{if(!r.ok)throw Error("원본 파일: "+f);return r.text();}))),
+ fetch("places.html",{cache:"no-store"}).then(r=>{if(!r.ok)throw Error("장소 이미지 파일");return r.text();})
+]).then(([pieces,locations])=>{
+ const complete=extendSamsaenghwaPage(patchDetailPage(pieces.join("")),locations,"kamichat");
+ const url=URL.createObjectURL(new Blob([complete],{type:"text/html"}));
  const frame=document.getElementById("page");
- frame.onload=()=>document.getElementById("loading")?.remove();
+ frame.onload=()=>{document.getElementById("loading")?.remove()};
  frame.src=url;
-})
-.catch(err=>{document.getElementById("loading").textContent="페이지를 불러오지 못했습니다: "+err.message;});
+}).catch(err=>{document.getElementById("loading").textContent="페이지를 불러오지 못했습니다: "+err.message});
 </script>
 </body>
 </html>
