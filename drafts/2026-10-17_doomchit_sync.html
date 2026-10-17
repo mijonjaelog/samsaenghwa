@@ -1,0 +1,300 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>삼생화 三生花 — 둠칫 상세 소개</title>
+<style>
+html,body,#page{margin:0;width:100%;height:100%;border:0;background:#171318}
+body{overflow:hidden}
+#loading{position:fixed;inset:0;display:grid;place-items:center;color:#f3e6e8;font-family:"Apple SD Gothic Neo",sans-serif;background:#171318;z-index:2}
+</style>
+</head>
+<body>
+<div id="loading">삼생화 상세페이지를 불러오는 중...</div>
+<iframe id="page" title="삼생화 상세 소개"></iframe>
+<script>
+const DETAIL_VERSION="v5.4-20261006-1410";
+const files=Array.from({length:28},(_,i)=>"parts/part-"+String(i+1).padStart(2,"0")+".htmlpart?v="+DETAIL_VERSION);
+
+function patchDetailPage(html){
+  const extraCss = `
+<style id="samsaenghwa-v3-patch">
+.sample-dialogue{margin-top:16px;padding:0;background:transparent;border:0}
+.dialogue-head{display:flex;align-items:center;gap:10px;margin-bottom:9px}
+.dialogue-head::after{content:"";height:1px;flex:1;background:var(--line)}
+.dialogue-kicker{font-family:Georgia,"Times New Roman",serif;font-size:10px;letter-spacing:.16em;color:var(--rose);font-weight:700;white-space:nowrap}
+.dialogue-quote{margin:8px 0 0;padding:11px 13px;border:1px solid #ead8dc;background:rgba(255,251,249,.82);color:#6b4650;font-size:12.5px;line-height:1.65}
+.dialogue-quote+.dialogue-quote{margin-top:7px}
+#persona>h2{margin-bottom:25px}
+#persona>p{display:none!important}
+.persona-grid{gap:14px}
+.persona-card{padding:20px 20px 18px;border:1px solid var(--line);background:linear-gradient(145deg,rgba(255,255,255,.96),rgba(252,246,245,.94));box-shadow:0 10px 28px rgba(82,55,63,.045)}
+.persona-card::before{content:"";position:absolute;inset:0 auto 0 0;width:2px;background:linear-gradient(180deg,var(--rose2),transparent 78%)}
+.persona-index{display:none!important}
+.persona-card h3{display:flex;align-items:center;gap:9px;margin:0;font-size:16px}
+.persona-emoji{display:inline;width:auto;height:auto;flex:0 0 auto;border:0;border-radius:0;background:transparent;font-size:18px;line-height:1}
+.persona-mini{margin-left:auto;font-size:9px;font-weight:600;letter-spacing:.08em;color:#a68890;white-space:nowrap}
+.persona-card .examples{margin:13px 0 12px;padding-bottom:12px;border-bottom:1px solid #efe1e3;font-size:12.5px;color:#765a62}
+.persona-card dl{margin:0}
+.persona-card dl div{display:flex;gap:8px;align-items:baseline;border:0;padding:3px 0}
+.persona-card dt{flex:0 0 auto;font-size:9px;letter-spacing:.08em;color:#b08d95}
+.persona-card dd{margin:0;font-size:11.5px;color:#695159}
+.command-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:11px}
+.command-card{background:#fff;border:1px solid var(--line);padding:17px 18px;position:relative;overflow:hidden}
+.command-card::after{content:"";position:absolute;left:0;top:0;bottom:0;width:2px;background:var(--rose2)}
+.command-card code{display:inline-block;font-family:inherit;font-size:14px;font-weight:700;color:#5d3c46;background:#faf1f2;border:1px solid #ecdadd;padding:5px 9px;border-radius:4px}
+.command-card p{margin:10px 0 0;font-size:12px;line-height:1.65;color:#665058}
+.command-note{margin-top:14px;padding:15px 17px;border:1px solid var(--line);background:var(--paper2);font-size:12px;line-height:1.7;color:#705861}
+.command-note b{color:#553841}
+.command-head{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.command-usage{font-size:9px;line-height:1.4;letter-spacing:.03em;color:#aa8d95}
+
+.office-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:20px}
+.office-card{position:relative;padding:18px 19px;border:1px solid var(--line);background:linear-gradient(145deg,#fff,#fcf7f5)}
+.office-card::before{content:"";position:absolute;left:0;top:0;bottom:0;width:2px;background:var(--rose2)}
+.office-card strong{display:flex;align-items:baseline;gap:8px;font-size:16px;color:#523740}
+.office-card strong em{font-style:normal;font-family:Georgia,"Times New Roman",serif;font-size:11px;color:#b17a87;letter-spacing:.08em}
+.office-card p{margin:9px 0 0;font-size:12.5px;line-height:1.7;color:#705861}
+.office-card small{display:block;margin-top:8px;font-size:10px;color:#a1848c}
+@media(max-width:680px){.command-grid{grid-template-columns:1fr}.persona-card{padding:18px 17px 16px}.office-grid{grid-template-columns:1fr}}
+</style>`;
+
+  if(!html.includes('id="samsaenghwa-v3-patch"')){
+    html = html.replace('</head>', extraCss + '\n</head>');
+  }
+
+  const dialogues = [
+    '“말하지 않아도 되는 일이라면 묻지 않겠습니다. 다만 사라지지는 마십시오.”',
+    '“돌려 말하지 마십시오. 그래서 뭘 원하는 겁니까.”',
+    '“그럴 줄 알았습니다. 그래서 밥은 드셨습니까?”',
+    '“이상하군요. 방금 말씀과 기록 중 하나는 틀렸다는 뜻인데.”',
+    '“괜찮기는요. 얼굴이 그 모양인데. 일단 앉아요.”',
+    '“믿고 있습니다. 그러나 그 문서를 보여드릴 권한은 없습니다.”'
+  ];
+
+  const oldQuotes = [
+    '“말하지 않아도 되는 일이라면 묻지 않겠습니다. 다만 사라지지는 마십시오.”',
+    '“돌려 말하지 마십시오. 그래서 뭘 원하는 겁니까.”',
+    '“그럴 줄 알았습니다. 그래서 밥은 드셨습니까?”',
+    '“이상하군요. 방금 말씀과 기록 중 하나는 틀렸다는 뜻인데.”',
+    '“괜찮기는요. 얼굴이 그 모양인데. 일단 앉아요.”',
+    '“믿고 있습니다. 그러나 그 문서를 보여드릴 권한은 없습니다.”'
+  ];
+
+  oldQuotes.forEach((q,i)=>{
+    const old = '<blockquote>'+q+'</blockquote>';
+    const d = dialogues[i];
+    const neu = '<div class="sample-dialogue"><div class="dialogue-head"><span class="dialogue-kicker">DIALOGUE</span></div><p class="dialogue-quote">'+d+'</p></div>';
+    if(html.includes(old)) html = html.replace(old, neu);
+  });
+
+  html = html.replace('<h2>USER 페르소나 추천</h2>','<h2>페르소나 추천</h2>');
+  html = html.replace('<p style="max-width:760px;margin-top:-7px;margin-bottom:24px;color:#705861;font-size:14px">전부 예시일 뿐입니다. 성별·성격·가문·세부 직업은 자유롭게 바꿔도 됩니다.</p>','');
+
+  const personas = [
+    ['기록을 만지는 사람','📜','문서 · 수사'],
+    ['북령과 연결된 사람','🐎','군문 · 물류'],
+    ['경화에서 먹고사는 사람','🏮','생활 · 경제'],
+    ['약재와 사람을 다루는 사람','🌿','약방 · 돌봄'],
+    ['관청 출입이 가능한 사람','🏛️','관료 · 정치'],
+    ['아무것도 모르는 외지인','🧳','자유 진입']
+  ];
+  personas.forEach(([title,emoji,note])=>{
+    const old='<h3>'+title+'</h3>';
+    const neu='<h3><span class="persona-emoji" aria-hidden="true">'+emoji+'</span>'+title+'<span class="persona-mini">'+note+'</span></h3>';
+    if(html.includes(old)) html=html.replace(old,neu);
+  });
+
+  const commandsSection = `
+<section class="section" id="commands">
+  <div class="kicker">CHAT COMMANDS</div>
+  <h2>필요할 때, 한 줄로 확인.</h2>
+  <p style="max-width:780px;margin-top:-7px;margin-bottom:24px;color:#705861;font-size:14px">채팅창에 그대로 입력해 현재 상태를 확인할 수 있습니다. 조회형 명령어는 장면을 진행하지 않고, 현재 공개된 정보만 보여줍니다.</p>
+  <div class="command-grid">
+    <article class="command-card reveal"><code>!상태</code><p>현재 날짜·시간·날씨·장소, 거처·생업·잔액과 사건 상태를 확인합니다.</p></article>
+    <article class="command-card reveal"><code>!관계</code><p>주요 인물과의 현재 공개 관계, 최근 접촉과 약속·갈등을 확인합니다.</p></article>
+    <article class="command-card reveal"><code>!사건</code><p>지금까지 확인한 사건 정보와 현재 가설, 아직 풀리지 않은 의문을 정리합니다.</p></article>
+    <article class="command-card reveal"><code>!기록</code><p>실제로 겪은 주요 사건과 확인된 기억·문서·증언을 다시 확인합니다.</p></article>
+    <article class="command-card reveal"><code>!생활</code><p>거처·생업·잔액·최근 거래·생활 약속처럼 현재 생활 상태를 확인합니다.</p></article>
+    <article class="command-card reveal"><code>!달력</code><p>오늘의 날짜·시간·날씨와 이미 공개된 일정, 실제로 잡힌 개인 약속을 확인합니다.</p></article>
+    <article class="command-card reveal"><code>!미션</code><p>현재 공개된 미션과 진행 가능한 목표, 최근 완료 기록을 확인합니다.</p></article>
+    <article class="command-card reveal"><code>!엔딩</code><p>실제로 달성해 기록된 엔딩만 확인합니다. 아직 없으면 빈 기록으로 표시됩니다.</p></article>
+    <article class="command-card reveal"><div class="command-head"><code>!캐붕점검</code><span class="command-usage">인물명 입력 · 예: !캐붕점검 류서겸</span></div><p>지정 인물의 공개된 성격·말투·행동을 기준으로 현재 캐릭터성 이탈 여부를 점검합니다.</p></article>
+    <article class="command-card reveal"><div class="command-head"><code>!오류수정</code><span class="command-usage">수정할 내용 입력</span></div><p>확정된 설정이나 현재 상태에서 발견한 오류만 점검하고 바로잡습니다.</p></article>
+  </div>
+  <div class="command-note reveal"><b>TIP</b> · 명령어는 정보를 확인하는 용도입니다. 관계·사건·미션·엔딩은 실제 RP에서 한 선택과 행동에 따라 달라집니다.</div>
+</section>
+`;
+  if(!html.includes('id="commands"')){
+    html = html.replace('<section class="section" id="play">', commandsSection + '\n<section class="section" id="play">');
+  }
+
+  html = html.replace('<button data-target="persona">추천 페르소나</button>\n      <button data-target="play">플레이 특징</button>',
+                      '<button data-target="persona">추천 페르소나</button>\n      <button data-target="commands">명령어</button>\n      <button data-target="play">플레이 특징</button>');
+  html = html.replace('<button class="nav-btn" data-target="persona">추천 페르소나</button>\n    <button class="nav-btn" data-target="play">플레이</button>',
+                      '<button class="nav-btn" data-target="persona">추천 페르소나</button>\n    <button class="nav-btn" data-target="commands">명령어</button>\n    <button class="nav-btn" data-target="play">플레이</button>');
+  html = html.replace('<button class="nav-btn" data-target="fragment">기억의 파편</button>\n    <button class="nav-btn" data-target="fragment">파편</button>',
+                      '<button class="nav-btn" data-target="fragment">파편</button>\n  <button class="nav-btn" data-target="commands">명령어</button>');
+  html = html.replace("const sectionIds = ['intro','fragment','world','case','cast','persona','play'];",
+                      "const sectionIds = ['intro','fragment','world','case','cast','persona','commands','play'];");
+
+  // v5: 조선계 관제로 통일
+  html = html.replaceAll('도찰원 감찰어사','사헌부 지평');
+  html = html.replaceAll('감찰어사','사헌부 지평');
+  html = html.replaceAll('도찰원','사헌부');
+
+  const officesSection = `
+<section class="section" id="offices">
+  <div class="kicker">CENTRAL OFFICES</div>
+  <h2>경화의 주요 관청</h2>
+  <p style="max-width:780px;margin-top:-7px;margin-bottom:22px;color:#705861;font-size:14px">연국의 중앙 관청은 실제 조선 관제를 바탕으로 재구성했다. 이름은 낯설어도, 역할만 알면 인물들의 움직임이 훨씬 쉽게 보인다.</p>
+  <div class="office-grid">
+    <article class="office-card reveal"><strong>사헌부 <em>司憲府</em></strong><p>관리의 비리와 기강을 살피고 감찰·탄핵을 맡는 관청.</p><small>류서겸 · 지평</small></article>
+    <article class="office-card reveal"><strong>승정원 <em>承政院</em></strong><p>왕명을 출납하고 국왕과 각 관청 사이의 보고·문서를 잇는 왕의 비서기관.</p><small>신윤서 · 주서</small></article>
+    <article class="office-card reveal"><strong>형조 <em>刑曹</em></strong><p>형벌·재판·법무를 담당하며 사건의 수사와 처분 절차에 관여하는 관청.</p><small>문지후 · 정랑</small></article>
+    <article class="office-card reveal"><strong>예문관 <em>藝文館</em></strong><p>왕명 문서와 교서, 기록과 문한 업무를 맡아 글과 기록을 다루는 관청.</p><small>서문령 · 검열</small></article>
+  </div>
+</section>
+`;
+  if(!html.includes('id="offices"')){
+    html = html.replace('<section class="section" id="case">', officesSection + '\n<section class="section" id="case">');
+  }
+
+  html = html.replace('<button data-target="world">세계관</button>\n      <button data-target="cast">등장인물</button>',
+                      '<button data-target="world">세계관</button>\n      <button data-target="offices">관청</button>\n      <button data-target="cast">등장인물</button>');
+  html = html.replace('<button class="nav-btn" data-target="world">세계관</button>\n    <button class="nav-btn" data-target="case">현재 사건</button>',
+                      '<button class="nav-btn" data-target="world">세계관</button>\n    <button class="nav-btn" data-target="offices">관청</button>\n    <button class="nav-btn" data-target="case">현재 사건</button>');
+  html = html.replace("const sectionIds = ['intro','fragment','world','case','cast','persona','commands','play'];",
+                      "const sectionIds = ['intro','fragment','world','offices','case','cast','persona','commands','play'];");
+
+
+  // v5.1: 캐릭터 대사 블록 6인 통일
+  {
+    const doc = new DOMParser().parseFromString(html,'text/html');
+    const quoteByName = {
+      '류서겸':'“말하지 않아도 되는 일이라면 묻지 않겠습니다. 다만 사라지지는 마십시오.”',
+      '위무진':'“돌려 말하지 마십시오. 그래서 뭘 원하는 겁니까.”',
+      '문지후':'“그럴 줄 알았습니다. 그래서 밥은 드셨습니까?”',
+      '서문령':'“이상하군요. 방금 말씀과 기록 중 하나는 틀렸다는 뜻인데.”',
+      '한소담':'“괜찮기는요. 얼굴이 그 모양인데. 일단 앉아요.”',
+      '신윤서':'“믿고 있습니다. 그러나 그 문서를 보여드릴 권한은 없습니다.”'
+    };
+    doc.querySelectorAll('article.character-card').forEach(card=>{
+      const copy = card.querySelector('.character-copy');
+      const h3 = copy && copy.querySelector('h3');
+      if(!copy || !h3) return;
+      let name = '';
+      for(const node of h3.childNodes){
+        if(node.nodeType===Node.TEXT_NODE && node.textContent.trim()){
+          name = node.textContent.trim();
+          break;
+        }
+      }
+      const quote = quoteByName[name];
+      if(!quote) return;
+      copy.querySelectorAll('.sample-dialogue, .dialogue-examples, blockquote').forEach(el=>el.remove());
+      const box = doc.createElement('div');
+      box.className = 'sample-dialogue';
+      box.innerHTML = '<div class="dialogue-head"><span class="dialogue-kicker">DIALOGUE</span></div><p class="dialogue-quote">'+quote+'</p>';
+      const tags = copy.querySelector('.tags');
+      if(tags) tags.before(box); else copy.appendChild(box);
+    });
+    html = '<!doctype html>\n' + doc.documentElement.outerHTML;
+  }
+
+
+  return html;
+}
+
+
+
+/* PLATFORM PAGE: original character imagery and text remain unchanged.
+   The same layout and scroll tracking are applied to Doomchit and Kamichat. */
+function extendSamsaenghwaPage(html, placesMarkup, platform) {
+ const doc=new DOMParser().parseFromString(html,'text/html');
+ const rawPlaces=new DOMParser().parseFromString(placesMarkup,'text/html');
+ const isKami=platform==='kamichat';
+ doc.title='삼생화 三生花 | '+(isKami?'카미챗':'둠칫')+' 상세 소개';
+ const commands=doc.querySelector('#commands');
+ if(isKami&&commands){
+   const walker=doc.createTreeWalker(commands,NodeFilter.SHOW_TEXT);
+   let node;while((node=walker.nextNode()))node.nodeValue=node.nodeValue.replace(/!([가-힣]+)/g,'/$1');
+ }
+ const list=ENDING_RECORDS;
+ const ep=doc.createElement('section');
+ ep.id='endings';ep.className='section';
+ ep.innerHTML='<div class="kicker">ENDING COLLECTION</div>'+
+   '<h2>세 번의 봄, 열 가지 결말.</h2>'+
+   '<p class="ending-intro">각자가 걸어온 길 끝에 서로 다른 결말이 남습니다. 엔딩 이름과 담당 인물을 소개하며, 달성 조건과 숨겨진 진상은 공개하지 않습니다.</p>'+
+   '<div class="ending-collection">'+list.map(([id,name,rank,npc])=>
+    '<article class="ending-card"><span class="ending-id">'+id+'</span><div class="ending-info">'+
+    '<div class="ending-title-row"><h3>'+name+'</h3><span class="ending-rank">'+rank+'</span></div>'+
+    '<p class="ending-owner">'+npc+'</p></div></article>').join('')+'</div>';
+ const placeSection=doc.createElement('section');
+ placeSection.id='places';placeSection.className='section';
+ placeSection.innerHTML='<div class="kicker">WORLD & DAILY LIFE</div><h2>경화에서 살아가는 곳들</h2>';
+ const placeWrap=doc.createElement('div');
+ placeWrap.className='page-places';
+ for(const [id,count] of [['places-work',8],['places-background',10]]){
+  const group=rawPlaces.getElementById(id);
+  if(!group||group.querySelectorAll('.place-card').length!==count)throw Error('장소 '+id+' 이미지 개수 불일치');
+  const part=doc.createElement('div');
+  part.className='page-places-group';
+  part.innerHTML=group.innerHTML;
+  part.querySelectorAll('.places-section-note').forEach(x=>x.remove());
+  placeWrap.appendChild(part);
+ }
+ placeSection.appendChild(placeWrap);
+ const play=doc.getElementById('play');
+ if(!play)throw Error('원본 플레이 섹션을 찾을 수 없습니다');
+ play.before(placeSection,ep);
+ // Add both new targets before the existing Play button, matching page order.
+ for(const menu of doc.querySelectorAll('.sticky-nav,.mobile-dock')){
+  const playButton=menu.querySelector('button[data-target="play"]');
+  if(!playButton)continue;
+  for(const [id,label] of [['places','생활·장소'],['endings','엔딩 10종']]){
+   const btn=playButton.cloneNode(true);
+   btn.classList.remove('active');
+   btn.dataset.target=id;btn.textContent=label;
+   playButton.before(btn);
+  }
+ }
+ const jump=doc.querySelector('.jump-grid');
+ if(jump){const before=jump.querySelector('button[data-target="play"]');if(before)for(const [id,label] of [['places','생활·장소'],['endings','엔딩 10종']]){const btn=before.cloneNode(true);btn.dataset.target=id;btn.textContent=label;before.before(btn)}}
+ // Disable incomplete 7-section IntersectionObserver from the original.
+ for(const node of doc.querySelectorAll('script')){
+  let txt=node.textContent||'';
+  if(!txt.includes('const sectionIds')||!txt.includes('const observer = new IntersectionObserver'))continue;
+  const revised=txt.replace(/const observer = new IntersectionObserver\([\s\S]*?sections\.forEach\(s => observer\.observe\(s\)\);/,
+     '/* Unified eleven-section scroll tracker replaces the old partial observer. */');
+  if(revised===txt)throw Error('메뉴 감지 코드가 교체되지 않았습니다');
+  node.textContent=revised;
+ }
+ const style=doc.createElement('style');
+ style.id='samsaenghwa-unified-extension';
+ style.textContent=UNIFIED_STYLE;
+ doc.head.appendChild(style);
+ const script=doc.createElement('script');
+ script.id='samsaenghwa-unified-navigation';
+ script.textContent=SCROLL_TRACKING_JS;
+ doc.body.appendChild(script);
+ return '<!doctype html>\n'+doc.documentElement.outerHTML;
+}
+const ENDING_RECORDS=[["E01","각자의 봄","COMMON","비연애 · 공동체 정착"],["E02","내가 고른 계절","COMMON","비연애 · 독립적인 새 출발"],["E03","북령으로 가는 길","RARE","위무진"],["E04","평범한 저녁의 약속","RARE","문지후"],["E05","기록 밖의 이름","RARE","서문령"],["E06","청연당의 여름","RARE","한소담"],["E07","남겨진 여백","RARE","신윤서"],["E08","꽃이 진 뒤에도","EPIC","류서겸"],["E09","두 번의 봄을 지나","EPIC","삼생 진실 · 연애 선택 무관"],["E10","삼생화","LEGENDARY","장기 누적 · 특정 연애 상대 없음"]];
+const UNIFIED_STYLE="\n/* Both sites keep the existing paper palette and portraits. */\n#places .page-places{max-width:1080px;margin:0 auto}\n#places .page-places-group{padding:24px 0 17px}\n#places .page-places-group+.page-places-group{padding-top:35px}\n#places .page-places-group .kicker{font:700 11px/1.5 Georgia,serif;letter-spacing:.16em;color:var(--rose,#af7886)}\n#places .places-title-row{display:flex;align-items:center;justify-content:space-between;gap:12px}\n#places .places-title-row h2{font-size:clamp(22px,3.2vw,29px);margin:12px 0 14px}\n#places .places-count{font:600 11px Arial,sans-serif;color:#a96577;border:1px solid #e5c8d0;background:#fff7f8;padding:6px 11px;border-radius:100px;white-space:nowrap}\n#places .places-intro{font-size:13px;line-height:1.8;color:#7d626c;margin:0 0 20px}\n#places .places-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:13px}\n#places .place-card{min-width:0;overflow:hidden;border:1px solid var(--line,#e9d8da);border-radius:7px;background:#fff;box-shadow:0 8px 24px rgba(75,38,52,.045)}\n#places .place-image-link{display:block;aspect-ratio:4/5;overflow:hidden;background:#f2e7ea}\n#places .place-image-link img{display:block;width:100%;height:100%;object-fit:cover;transition:transform .25s}\n#places .place-image-link:hover img{transform:scale(1.035)}\n#places .place-body{padding:14px 15px 16px}\n#places .place-kind{font-size:11px;color:#b07989}\n#places .place-body h3{font-size:15px;line-height:1.5;color:#553941;margin:6px 0 8px}\n#places .place-body p{font-size:12px;line-height:1.7;color:#7b646d;margin:0}\n#endings .ending-intro{font-size:13px;color:#7f626e;line-height:1.8;margin:5px 0 22px}\n#endings .ending-collection{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}\n#endings .ending-card{display:flex;align-items:flex-start;gap:15px;min-width:0;padding:20px;border:1px solid var(--line,#e8d8dc);border-radius:5px;background:linear-gradient(135deg,#fff,#fff9f7)}\n#endings .ending-id{flex:0 0 35px;color:#b57989;font:700 12px Georgia,serif;margin-top:6px}\n#endings .ending-title-row{display:flex;flex-wrap:wrap;align-items:center;gap:9px}\n#endings .ending-title-row h3{font-size:16px;color:#563b43;margin:0}\n#endings .ending-rank{font:700 9px Arial,sans-serif;letter-spacing:.04em;color:#aa6e7e;border:1px solid #e6cbd0;border-radius:100px;padding:4px 8px;background:#fff9fa}\n#endings .ending-owner{font-size:12px;color:#8c6975;margin:7px 0 0}\n.sticky-nav .nav-btn.active,.mobile-dock .nav-btn.active{color:#fff!important;background:#a55c70!important;border-color:#a55c70!important}\n.sticky-nav .sticky-inner{max-width:100%;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch}\n.sticky-nav .sticky-inner::-webkit-scrollbar{display:none}\n.section#places,.section#endings{scroll-margin-top:74px}\n@media(max-width:850px){#places .places-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}\n@media(max-width:680px){#endings .ending-collection{grid-template-columns:1fr}}\n@media(max-width:440px){#places .places-grid{gap:9px}#places .place-body{padding:10px}#places .place-body h3{font-size:13px}#places .place-body p{font-size:11px}}\n@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}";
+const SCROLL_TRACKING_JS="(function(){\n'use strict';\nconst menu=[...document.querySelectorAll('.sticky-nav .nav-btn,.mobile-dock .nav-btn')];\nconst nav=document.querySelector('.sticky-nav');\nconst targets=[...new Set(document.querySelectorAll('.sticky-nav .nav-btn'))].map(b=>b.dataset.target).filter(id=>document.getElementById(id));\nlet current='',frame=0,holdUntil=0;\nfunction choose(id,force){\n if(!id||(id===current&&!force))return;\n current=id;\n for(const button of menu){const yes=button.dataset.target===id;button.classList.toggle('active',yes);if(yes)button.setAttribute('aria-current','location');else button.removeAttribute('aria-current')}\n const btn=menu.find(b=>b.dataset.target===id&&b.closest('.sticky-nav'));\n const rail=btn?.parentElement;\n if(rail&&rail.scrollWidth>rail.clientWidth+8){\n  const left=btn.offsetLeft-(rail.clientWidth-btn.offsetWidth)/2;\n  rail.scrollTo({left:Math.max(0,left),behavior:'instant'});\n }\n}\nfunction sync(){\n frame=0;if(performance.now()<holdUntil)return;\n const marker=(nav?.getBoundingClientRect().height||60)+Math.min(110,innerHeight*.17);\n let id=targets[0];\n for(const target of targets){const el=document.getElementById(target);if(el&&el.getBoundingClientRect().top<=marker)id=target}\n if(innerHeight+scrollY>=document.documentElement.scrollHeight-3)id=targets[targets.length-1];\n choose(id);\n}\nfunction request(){if(!frame)frame=requestAnimationFrame(sync)}\nfor(const btn of menu)btn.addEventListener('click',()=>{\n const id=btn.dataset.target;if(!targets.includes(id))return;\n choose(id,true);holdUntil=performance.now()+460;\n setTimeout(()=>{holdUntil=0;request()},580);\n});\naddEventListener('scroll',request,{passive:true});addEventListener('resize',request,{passive:true});\naddEventListener('pageshow',request);\nif('ResizeObserver'in window){const ro=new ResizeObserver(request);if(nav)ro.observe(nav)}\ndocument.fonts?.ready.then(request);request();\n})();";
+
+Promise.all([
+ Promise.all(files.map(f=>fetch(f,{cache:"no-store"}).then(r=>{if(!r.ok)throw Error("원본 파일: "+f);return r.text();}))),
+ fetch("kamichat/places.html",{cache:"no-store"}).then(r=>{if(!r.ok)throw Error("장소 이미지 파일");return r.text();})
+]).then(([pieces,locations])=>{
+ const complete=extendSamsaenghwaPage(patchDetailPage(pieces.join("")),locations,"doomchit");
+ const url=URL.createObjectURL(new Blob([complete],{type:"text/html"}));
+ const frame=document.getElementById("page");
+ frame.onload=()=>{document.getElementById("loading")?.remove()};
+ frame.src=url;
+}).catch(err=>{document.getElementById("loading").textContent="페이지를 불러오지 못했습니다: "+err.message});
+</script>
+</body>
+</html>
