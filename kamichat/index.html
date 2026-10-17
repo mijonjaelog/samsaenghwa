@@ -289,14 +289,14 @@ function patchKamichatPlaces(html){
    b.before(b2);
  });
  const st=doc.createElement('script');
- st.textContent=String.raw\`
+ st.textContent=`
 window.addEventListener('message',function(e){
  if(e.origin!==window.location.origin || !e.data || e.data.type!=='samsaenghwa-places-height') return;
  var frame=document.getElementById('kami-places-frame');
  var h=Number(e.data.height);
  if(frame && Number.isFinite(h) && h>300 && h<12000){frame.style.height=(h+16)+'px';}
 });
-\`;
+`;
  doc.body.appendChild(st);
  return '<!doctype html>\n'+doc.documentElement.outerHTML;
 }
