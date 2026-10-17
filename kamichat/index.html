@@ -265,9 +265,45 @@ function patchKamichatPage(html){
   return output;
 }
 
+
+/* KAMICHAT LOCATIONS PATCH: preserves the original page, six portraits and existing ending definitions. */
+function patchKamichatPlaces(html){
+ const doc=new DOMParser().parseFromString(html,'text/html');
+ if(doc.getElementById('kami-places'))return html;
+ const section=doc.createElement('section');
+ section.className='section';
+ section.id='kami-places';
+ section.innerHTML=
+  '<div class="kicker">WORLD & DAILY LIFE · 19 LOCATIONS</div>'+
+  '<h2>경화에서 살아가는 곳들</h2>'+
+  '<p style="max-width:780px;color:#795e68;font-size:13px;line-height:1.9;margin:0 0 14px">품삯과 생활 장소 8곳, 연국의 주요 배경 11곳. 첨부된 원본 그림을 바탕으로 장소명·구분·한 줄 소개를 정리했습니다.</p>'+
+  '<iframe id="kami-places-frame" title="삼생화 장소 19곳: 품삯 및 생활 공간과 주요 배경" src="https://mijonjaelog.github.io/samsaenghwa/kamichat/places.html" loading="lazy" scrolling="no" style="width:100%;height:2450px;border:0;background:#fffaf9;display:block"></iframe>';
+ const endings=doc.getElementById('endings');
+ const play=doc.getElementById('play');
+ if(endings)endings.before(section);else if(play)play.before(section);else doc.body.appendChild(section);
+ const nav=Array.from(doc.querySelectorAll('button[data-target="endings"],.nav-btn[data-target="endings"]'));
+ nav.forEach(b=>{
+   const b2=b.cloneNode(true);
+   b2.setAttribute('data-target','kami-places');
+   b2.textContent='생활·장소';
+   b.before(b2);
+ });
+ const st=doc.createElement('script');
+ st.textContent=String.raw\`
+window.addEventListener('message',function(e){
+ if(e.origin!==window.location.origin || !e.data || e.data.type!=='samsaenghwa-places-height') return;
+ var frame=document.getElementById('kami-places-frame');
+ var h=Number(e.data.height);
+ if(frame && Number.isFinite(h) && h>300 && h<12000){frame.style.height=(h+16)+'px';}
+});
+\`;
+ doc.body.appendChild(st);
+ return '<!doctype html>\n'+doc.documentElement.outerHTML;
+}
+
 Promise.all(files.map(f=>fetch(f,{cache:"no-store"}).then(r=>{if(!r.ok) throw new Error(f); return r.text();})))
 .then(chunks=>{
-  const patched = patchKamichatPage(patchDetailPage(chunks.join("")));
+  const patched = patchKamichatPlaces(patchKamichatPage(patchDetailPage(chunks.join(""))));
   const url=URL.createObjectURL(new Blob([patched],{type:"text/html"}));
   const frame=document.getElementById("page");
   frame.onload=()=>document.getElementById("loading").remove();
