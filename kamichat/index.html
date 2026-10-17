@@ -236,6 +236,7 @@ function patchKamichatPage(html){
       '<p class="kami-ending-owner">'+owner+'</p></div></article>'
     ).join('')+'</div>'+
     '<p class="kami-ending-foot">COMMON 2 · RARE 5 · EPIC 2 · LEGENDARY 1<br>카미챗에서는 /엔딩 명령어로 실제 달성한 엔딩 기록을 조회합니다. 달성 조건은 플레이 중 공개되는 정보만 적용합니다.</p>';
+  section.querySelector('.kami-ending-foot')?.remove();
   const play=doc.getElementById('play');
   if(play)play.before(section);else doc.body.appendChild(section);
   const css=doc.createElement('style');
@@ -274,10 +275,11 @@ function patchKamichatPlaces(html){
  section.className='section';
  section.id='kami-places';
  section.innerHTML=
-  '<div class="kicker">WORLD & DAILY LIFE · 19 LOCATIONS</div>'+
+  '<div class="kicker">WORLD & DAILY LIFE</div>'+
   '<h2>경화에서 살아가는 곳들</h2>'+
   '<p style="max-width:780px;color:#795e68;font-size:13px;line-height:1.9;margin:0 0 14px">품삯과 생활 장소 8곳, 연국의 주요 배경 11곳. 첨부된 원본 그림을 바탕으로 장소명·구분·한 줄 소개를 정리했습니다.</p>'+
   '<iframe id="kami-places-frame" title="삼생화 장소 19곳: 품삯 및 생활 공간과 주요 배경" src="https://mijonjaelog.github.io/samsaenghwa/kamichat/places.html" loading="lazy" scrolling="no" style="width:100%;height:2450px;border:0;background:#fffaf9;display:block"></iframe>';
+ section.querySelector('p')?.remove();
  const endings=doc.getElementById('endings');
  const play=doc.getElementById('play');
  if(endings)endings.before(section);else if(play)play.before(section);else doc.body.appendChild(section);
@@ -298,6 +300,10 @@ window.addEventListener('message',function(e){
 });
 `;
  doc.body.appendChild(st);
+
+ for(const scr of doc.querySelectorAll('script')){let text=scr.textContent||'';if(text.includes('const sectionIds')&&text.includes('const observer = new IntersectionObserver')){text=text.replace(/const sectionIds = \[[^\]]*\];/,"const sectionIds = ['intro','fragment','world','offices','case','cast','persona','commands','kami-places','endings','play'];");text=text.replace(/const observer = new IntersectionObserver\([\s\S]*?sections\.forEach\(s => observer\.observe\(s\)\);/,'/* Active tab synchronization delegated to kami-scrollspy */');scr.textContent=text;}}
+ const activeStyle=doc.createElement('style');activeStyle.textContent="html{scroll-padding-top:calc(var(--kami-header-h,90px) + 15px)}.section{scroll-margin-top:calc(var(--kami-header-h,90px) + 15px)}header .nav-btn.active,.mobile-dock .nav-btn.active{background:#a75a6f!important;color:#fff!important;border-color:#a75a6f!important}header nav,.mobile-dock{scrollbar-width:none;-webkit-overflow-scrolling:touch}header nav::-webkit-scrollbar,.mobile-dock::-webkit-scrollbar{display:none}@media(max-width:720px){header nav,.mobile-dock{max-width:100%;overflow-x:auto}}";doc.head.appendChild(activeStyle);
+ const activeScript=doc.createElement('script');activeScript.id='kami-scrollspy-v2';activeScript.textContent="(()=>{const ids=['intro','fragment','world','offices','case','cast','persona','commands','kami-places','endings','play'];const btns=[...document.querySelectorAll('header [data-target],.mobile-dock [data-target]')];const header=document.querySelector('header');let current='',hold=0,raf=0;function apply(id,click=false){if(current===id&&!click)return;current=id;for(const b of btns){let yes=b.dataset.target===id;b.classList.toggle('active',yes);if(yes)b.setAttribute('aria-current','location');else b.removeAttribute('aria-current')}const b=btns.find(x=>x.dataset.target===id&&x.closest('header'))||btns.find(x=>x.dataset.target===id);const rail=b?.parentElement;if(rail?.scrollWidth>rail?.clientWidth+10)rail.scrollTo({left:Math.max(0,b.offsetLeft-(rail.clientWidth-b.offsetWidth)/2),behavior:'instant'})}function read(){raf=0;if(performance.now()<hold)return;const h=Math.max(60,header?.getBoundingClientRect().height||80);document.documentElement.style.setProperty('--kami-header-h',h+'px');let id='intro';for(const x of ids){const el=document.getElementById(x);if(el&&el.getBoundingClientRect().top<=h+38)id=x}if(innerHeight+scrollY>=document.documentElement.scrollHeight-3)id='play';apply(id)}const schedule=()=>{if(!raf)raf=requestAnimationFrame(read)};for(const b of btns)b.addEventListener('click',()=>{if(ids.includes(b.dataset.target)){apply(b.dataset.target,true);hold=performance.now()+310;setTimeout(()=>{hold=0;schedule()},450)}});addEventListener('scroll',schedule,{passive:true});addEventListener('resize',schedule,{passive:true});if('ResizeObserver' in window){const ro=new ResizeObserver(schedule);if(header)ro.observe(header);const place=document.getElementById('kami-places');if(place)ro.observe(place)}document.fonts?.ready.then(schedule);addEventListener('load',schedule);schedule()})();";doc.body.appendChild(activeScript);
  return '<!doctype html>\n'+doc.documentElement.outerHTML;
 }
 
