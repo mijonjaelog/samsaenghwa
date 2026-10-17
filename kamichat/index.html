@@ -14,7 +14,7 @@ body{overflow:hidden}
 <div id="loading">삼생화 상세페이지를 불러오는 중...</div>
 <iframe id="page" title="삼생화 상세 소개"></iframe>
 <script>
-const DETAIL_VERSION="v5.4-20261006-1410";
+const DETAIL_VERSION="v5.4-20261018-kami-slash";
 const files=Array.from({length:28},(_,i)=>"../parts/part-"+String(i+1).padStart(2,"0")+".htmlpart?v="+DETAIL_VERSION);
 
 function patchDetailPage(html){
@@ -221,6 +221,17 @@ function extendSamsaenghwaPage(html, placesMarkup, platform) {
    const walker=doc.createTreeWalker(commands,NodeFilter.SHOW_TEXT);
    let node;while((node=walker.nextNode()))node.nodeValue=node.nodeValue.replace(/!([가-힣]+)/g,'/$1');
  }
+
+ // KAMICHAT only: enforce slash notation on every rendered command card.
+ // The original Doomchit page continues to use !commands.
+ if(isKami){
+  const root=doc.getElementById('commands');
+  if(root){
+   root.querySelectorAll('code').forEach(el=>{
+    el.textContent=el.textContent.replace(/^\s*!/,'/');
+   });
+  }
+ }
  const list=ENDING_RECORDS;
  const ep=doc.createElement('section');
  ep.id='endings';ep.className='section';
@@ -244,6 +255,21 @@ function extendSamsaenghwaPage(html, placesMarkup, platform) {
   part.innerHTML=group.innerHTML;
   part.querySelectorAll('.places-section-note').forEach(x=>x.remove());
   placeWrap.appendChild(part);
+ }
+
+ // KAMICHAT only: retain corrected river card labels without changing Doomchit.
+ if(isKami){
+  for(const card of placeWrap.querySelectorAll('.place-card')){
+   const h3=card.querySelector('h3');
+   if(!h3)continue;
+   const title=h3.textContent.trim().replace(/\s+/g,'');
+   if(title!=='연화강' && title!=='연화강·노을')continue;
+   h3.textContent='연화강';
+   const kind=card.querySelector('.place-kind');if(kind)kind.textContent='강변';
+   const img=card.querySelector('img');if(img)img.alt='연화강 전경';
+   const link=card.querySelector('a.place-image-link');
+   if(link){link.setAttribute('aria-label','연화강 이미지 원본 보기');link.setAttribute('download','연화강 전경.webp')}
+  }
  }
  placeSection.appendChild(placeWrap);
  const play=doc.getElementById('play');
