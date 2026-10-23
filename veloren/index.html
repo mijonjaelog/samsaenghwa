@@ -50,6 +50,19 @@ h2{font-size:18px;margin:26px 0 2px;color:var(--pt);font-weight:900}
 .ps b{font-size:14px}.ps div{font-size:12.5px;color:var(--sub);margin-top:3px}
 .ft{text-align:center;font-size:11px;color:var(--sub);margin-top:28px}
 .gr{display:grid;grid-template-columns:64px 1fr 34px;gap:8px;align-items:center;font-size:12.5px;margin:7px 0}.gr .tr{height:9px;background:var(--chip);border-radius:9px;overflow:hidden}.gr .fl{height:100%;width:50%;border-radius:9px;background:linear-gradient(90deg,var(--pt),var(--pk));transition:width 1.2s}.gr span:last-child{color:var(--sub);text-align:right}.lg div{display:flex;gap:8px;font-size:12.5px;padding:7px 0;border-bottom:1px dashed var(--line);animation:fi .5s}.lg div:last-child{border:0}.lg time{flex:none;color:var(--sub);font-variant-numeric:tabular-nums}.lg b{flex:none;font-size:10.5px;border-radius:6px;padding:1px 6px;background:var(--chip);color:var(--chipt);height:18px;line-height:18px}.lg b.f{background:var(--pk);color:#fff}@keyframes fi{from{opacity:0;transform:translateY(-6px)}}.dm{display:flex;gap:6px;margin-top:10px}.dm div{flex:1;text-align:center;background:var(--chip);color:var(--chipt);border-radius:10px;padding:6px 2px;font-size:11.5px;font-weight:800}.dm div.c{background:var(--pt);color:#fff}
+
+/* VEL0REN SOUNDTRACK — SoundCloud compact audio card */
+.sc-music{margin:12px 0 18px;padding:13px 14px 12px;background:var(--card);border:1px solid var(--line);border-radius:16px;box-shadow:0 4px 18px rgba(90,60,140,.07)}
+.sc-music-head{display:flex;justify-content:space-between;gap:12px;align-items:center;margin-bottom:9px}
+.sc-music-title{font-size:13px;font-weight:900;color:var(--ink)}
+.sc-music-label{font-size:10px;font-weight:800;color:var(--pt);letter-spacing:.07em}
+.sc-music-player{min-height:94px;border-radius:10px;overflow:hidden;background:var(--box)}
+.sc-music-player iframe{display:block;width:100%;height:166px;border:0}
+.sc-music-loading{padding:28px 12px;color:var(--sub);font-size:12px;text-align:center}
+.sc-music-actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:10px}
+.sc-music-play{border:0;border-radius:20px;background:var(--pt);color:#fff;font:inherit;font-size:12px;font-weight:800;padding:8px 14px;cursor:pointer}
+.sc-music-link{font-size:12px;font-weight:700;color:var(--pt);text-decoration:none}
+.sc-music-hint{margin:8px 0 0;color:var(--sub);font-size:11px;line-height:1.5}
 </style></head><body>
 <div class="bar"><span class="live"><i class="dot"></i>ON AIR</span><span id="day">DAY 01 / 30</span><span id="clk">--:--:--</span></div>
 <div class="wrap">
@@ -58,6 +71,24 @@ h2{font-size:18px;margin:26px 0 2px;color:var(--pt);font-weight:900}
 <h1>아이, 돌(dol)겠네!</h1>
 <div class="cap" id="cap">“아이돌 넷이면 애 하나쯤 거뜬할 줄 알았지?”</div></div></div>
 <div class="tick"><b>팬반응</b><span id="tk">실시간 시청자 반응을 불러오는 중…</span></div>
+
+
+<!-- VEL0REN SOUNDTRACK: SoundCloud -->
+<section class="sc-music" aria-label="벨로렌 사운드트랙">
+  <div class="sc-music-head">
+    <span class="sc-music-title">🎧 VEL0REN SOUNDTRACK</span>
+    <span class="sc-music-label">♪ AUTO PLAY</span>
+  </div>
+  <div class="sc-music-player" id="veloren-sc-player" aria-live="polite">
+    <div class="sc-music-loading">SoundCloud 음악을 불러오는 중…</div>
+  </div>
+  <div class="sc-music-actions">
+    <button id="veloren-sc-play" class="sc-music-play" type="button">▶ 음악 재생</button>
+    <a class="sc-music-link" href="https://on.soundcloud.com/c4abNTHXR5TPojBQx4" target="_blank" rel="noopener noreferrer">SoundCloud에서 듣기 ↗</a>
+  </div>
+  <p class="sc-music-hint" id="veloren-sc-status">첫 방문이나 모바일에서는 브라우저가 자동재생을 차단할 수 있습니다. 그럴 때는 ▶ 음악 재생을 눌러주세요.</p>
+</section>
+<!-- /VEL0REN SOUNDTRACK -->
 
 <h2>📺 ON AIR · 프로그램 스틸컷</h2><p class="hint">좌우로 밀어 5장의 방송 이미지를 확인하세요 ↔</p>
 <div class="rail">
@@ -120,4 +151,61 @@ var L=[['현장','서이든이 분유 온도를 세 번째 확인 중'],['자막
 function ln(){var l=L[li++%L.length],d=document.createElement('div'),t=new Date(),p=function(n){return(n<10?'0':'')+n};d.innerHTML='<time>'+p(t.getHours())+':'+p(t.getMinutes())+':'+p(t.getSeconds())+'</time><b'+(l[0]==='현장'?' class="f"':'')+'>'+l[0]+'</b><span></span>';d.lastChild.textContent=l[1];lg.insertBefore(d,lg.firstChild);while(lg.children.length>6)lg.removeChild(lg.lastChild)}
 ln();ln();setInterval(ln,3500);
 })();
-</script></body></html>
+</script>
+
+<script>
+/* VEL0REN SoundCloud short-link resolver, embed, autoplay request, and click fallback */
+(function(){
+  'use strict';
+  const shareURL='https://on.soundcloud.com/c4abNTHXR5TPojBQx4';
+  const box=document.getElementById('veloren-sc-player');
+  const play=document.getElementById('veloren-sc-play');
+  const status=document.getElementById('veloren-sc-status');
+  let frame=null;
+  function directLink(){window.open(shareURL,'_blank','noopener,noreferrer');}
+  function openPlayer(){
+    if(frame){
+      if(window.SC&&typeof window.SC.Widget==='function'){
+        try{window.SC.Widget(frame).play();return;}catch(e){}
+      }
+      const u=new URL(frame.src);u.searchParams.set('auto_play','true');frame.src=u.toString();return;
+    }
+    directLink();
+  }
+  play.addEventListener('click',openPlayer);
+  const params=new URLSearchParams({
+    format:'json',url:shareURL,maxheight:'166',auto_play:'true',color:'b794ff',
+    show_comments:'false'
+  });
+  fetch('https://soundcloud.com/oembed?'+params.toString(),{mode:'cors'})
+    .then(function(response){if(!response.ok)throw new Error('oEmbed '+response.status);return response.json();})
+    .then(function(data){
+      const holder=document.createElement('div');
+      holder.innerHTML=data.html||'';
+      const source=holder.querySelector('iframe');
+      if(!source||!source.src)throw new Error('SoundCloud iframe missing');
+      const u=new URL(source.src);
+      if(u.hostname!=='w.soundcloud.com')throw new Error('Unrecognized SoundCloud host');
+      u.searchParams.set('auto_play','true');
+      u.searchParams.set('show_artwork','true');
+      u.searchParams.set('show_comments','false');
+      u.searchParams.set('show_user','true');
+      u.searchParams.set('show_reposts','false');
+      u.searchParams.set('show_teaser','false');
+      u.searchParams.set('color','#b794ff');
+      frame=document.createElement('iframe');
+      frame.id='veloren-sc-iframe';
+      frame.src=u.toString();frame.title=data.title||'VEL0REN SoundCloud 사운드트랙';
+      frame.allow='autoplay; encrypted-media';frame.setAttribute('scrolling','no');
+      frame.setAttribute('loading','eager');
+      box.replaceChildren(frame);
+      status.textContent='자동재생을 시도합니다. 브라우저에서 소리 재생을 차단하면 ▶ 음악 재생 또는 플레이어의 재생 버튼을 눌러주세요.';
+    })
+    .catch(function(error){
+      box.innerHTML='<div class="sc-music-loading">웹 플레이어를 불러오지 못했습니다. 아래 SoundCloud 링크에서 음악을 들어주세요.</div>';
+      status.textContent='SoundCloud 짧은 링크의 플레이어 변환에 실패했습니다. SoundCloud에서 듣기를 이용할 수 있습니다.';
+      play.textContent='▶ SoundCloud 열기';
+    });
+})();
+</script>
+</body></html>
